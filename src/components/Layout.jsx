@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../App';
+import { useAuth } from '../hooks/useAuth';
 import { getInitials, getRoleLabel } from '../services/pb';
 
 export default function Layout({ children, filter, onFilterChange, taskCounts }) {

@@ -6,8 +6,12 @@ const pb = new PocketBase('https://db.mkg.vn');
 pb.autoCancellation(false);
 
 // ===== AUTH =====
-export async function login(email, password) {
-  return await pb.collection('task_users').authWithPassword(email, password);
+export async function login(usernameOrEmail, password) {
+  // Auto-map shorthand username to email: admin → admin@mkg.vn
+  const identity = usernameOrEmail.includes('@')
+    ? usernameOrEmail
+    : `${usernameOrEmail}@mkg.vn`;
+  return await pb.collection('task_users').authWithPassword(identity, password);
 }
 
 export function logout() {

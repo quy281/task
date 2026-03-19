@@ -1,60 +1,79 @@
 import { useState } from 'react';
-import { useAuth } from '../App';
-import { getRoleColor, getRoleLabel } from '../services/pb';
+import { useAuth } from '../hooks/useAuth';
 
-const DEMO_ACCOUNTS = [
-    { email: 'giamdoc@mkg.vn', password: '12345678', name: 'Nguyễn Văn An', role: 'director' },
-    { email: 'truongphong@mkg.vn', password: '12345678', name: 'Trần Thị Bình', role: 'manager' },
-    { email: 'nhanvien@mkg.vn', password: '12345678', name: 'Lê Minh Cường', role: 'staff' },
+// Quick-access accounts (click để login ngay)
+const QUICK_ACCOUNTS = [
+    { label: 'Admin MKG', username: 'admin', password: 'mkg20144', role: 'director', color: '#ef4444' },
+    { label: 'Thuỷ Lê', username: 'thuyle', password: 'Mkg2024!', role: 'manager', color: '#f59e0b' },
 ];
 
 export default function LoginForm() {
     const { login } = useAuth();
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    async function handleSubmit(e) {
-        e.preventDefault();
+    async function doLogin(uname, pwd) {
         setError('');
         setLoading(true);
         try {
-            await login(email, password);
-        } catch (err) {
-            setError('Sai email hoặc mật khẩu');
+            await login(uname, pwd);
+        } catch (_) {
+            setError('Sai tên đăng nhập hoặc mật khẩu');
         } finally {
             setLoading(false);
         }
     }
 
-    async function handleDemo(account) {
-        setError('');
-        setLoading(true);
-        try {
-            await login(account.email, account.password);
-        } catch (err) {
-            setError('Tài khoản demo chưa được tạo trên database');
-        } finally {
-            setLoading(false);
-        }
+    async function handleSubmit(e) {
+        e.preventDefault();
+        await doLogin(username.trim(), password);
     }
 
     return (
         <div className="login-page">
             <div className="login-card">
                 <h1>📋 Giao Việc</h1>
-                <p>Quản lý công việc dễ dàng, hiệu quả</p>
+                <p>Hệ thống quản lý công việc MKG</p>
+
+                {/* Quick login buttons */}
+                <div className="demo-accounts">
+                    <h3>Đăng nhập nhanh</h3>
+                    {QUICK_ACCOUNTS.map(acc => (
+                        <button
+                            key={acc.username}
+                            className="demo-btn"
+                            onClick={() => doLogin(acc.username, acc.password)}
+                            disabled={loading}
+                        >
+                            <span className="role-dot" style={{ background: acc.color }} />
+                            <span>
+                                <strong>{acc.label}</strong>
+                                <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 6 }}>
+                                    ({acc.username})
+                                </span>
+                            </span>
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 12px' }}>
+                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>hoặc nhập thủ công</span>
+                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label>Email</label>
+                        <label>Tên đăng nhập</label>
                         <input
-                            type="email"
-                            placeholder="email@company.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            type="text"
+                            placeholder="admin, thuyle, ..."
+                            value={username}
+                            onChange={e => setUsername(e.target.value)}
                             required
+                            autoComplete="username"
                         />
                     </div>
                     <div className="input-group">
@@ -65,6 +84,7 @@ export default function LoginForm() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             required
+                            autoComplete="current-password"
                         />
                     </div>
                     <button className="btn-login" type="submit" disabled={loading}>
@@ -73,19 +93,8 @@ export default function LoginForm() {
                     {error && <div className="login-error">{error}</div>}
                 </form>
 
-                <div className="demo-accounts">
-                    <h3>Tài khoản demo</h3>
-                    {DEMO_ACCOUNTS.map(acc => (
-                        <button
-                            key={acc.email}
-                            className="demo-btn"
-                            onClick={() => handleDemo(acc)}
-                            disabled={loading}
-                        >
-                            <span className="role-dot" style={{ background: getRoleColor(acc.role) }} />
-                            <span><strong>{acc.name}</strong> – {getRoleLabel(acc.role)}</span>
-                        </button>
-                    ))}
+                <div style={{ marginTop: 14, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
+                    Liên hệ admin để được cấp tài khoản
                 </div>
             </div>
         </div>

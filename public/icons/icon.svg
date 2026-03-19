@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#2563eb"/>
+  <rect x="96" y="128" width="320" height="256" rx="24" fill="white" opacity="0.15"/>
+  <rect x="128" y="160" width="256" height="192" rx="16" fill="white"/>
+  <!-- Checklist lines -->
+  <rect x="168" y="200" width="12" height="12" rx="3" fill="#2563eb"/>
+  <rect x="192" y="202" width="130" height="8" rx="4" fill="#2563eb" opacity="0.7"/>
+  <rect x="168" y="228" width="12" height="12" rx="3" fill="#2563eb"/>
+  <rect x="192" y="230" width="100" height="8" rx="4" fill="#2563eb" opacity="0.7"/>
+  <rect x="168" y="256" width="12" height="12" rx="3" fill="#2563eb"/>
+  <rect x="192" y="258" width="120" height="8" rx="4" fill="#2563eb" opacity="0.7"/>
+  <rect x="168" y="284" width="12" height="12" rx="3" fill="#2563eb"/>
+  <rect x="192" y="286" width="80" height="8" rx="4" fill="#2563eb" opacity="0.7"/>
+  <!-- Checkmark on first -->
+  <path d="M170 205 l3 3 l6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <rect x="168" y="200" width="12" height="12" rx="3" fill="#22c55e"/>
+  <path d="M170 206 l3 3 l6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
