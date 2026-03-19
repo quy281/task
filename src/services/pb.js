@@ -63,7 +63,7 @@ export async function getSubordinates(currentUser) {
 // ===== TASKS =====
 export async function getTasks(filter = '') {
   return await pb.collection('tasks').getFullList({
-    sort: '-@created',
+    sort: '-id',
     filter: filter || undefined,
   });
 }
@@ -88,7 +88,7 @@ export async function deleteTask(id) {
 export async function getComments(taskId) {
   return await pb.collection('task_comments').getFullList({
     filter: `task = "${taskId}"`,
-    sort: '@created',
+    sort: 'id',
     expand: 'author',
   });
 }
@@ -97,7 +97,7 @@ export async function getLatestComment(taskId) {
   try {
     const result = await pb.collection('task_comments').getList(1, 1, {
       filter: `task = "${taskId}"`,
-      sort: '-@created',
+      sort: '-id',
       expand: 'author',
     });
     return result.items[0] || null;
