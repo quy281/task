@@ -64,15 +64,12 @@ export async function getSubordinates(currentUser) {
 export async function getTasks(filter = '') {
   return await pb.collection('tasks').getFullList({
     sort: '-created',
-    expand: 'assigned_by,assigned_to',
     filter: filter || undefined,
   });
 }
 
 export async function getTask(id) {
-  return await pb.collection('tasks').getOne(id, {
-    expand: 'assigned_by,assigned_to',
-  });
+  return await pb.collection('tasks').getOne(id);
 }
 
 export async function createTask(data) {
