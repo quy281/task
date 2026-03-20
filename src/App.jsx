@@ -1,17 +1,22 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { useTasks } from './hooks/useTasks';
+import { useNotifications } from './hooks/useNotifications';
 import LoginForm from './components/LoginForm';
 import Layout from './components/Layout';
 import TaskCard from './components/TaskCard';
 import TaskDetail from './components/TaskDetail';
 import TaskForm from './components/TaskForm';
+import AdminSettings from './components/AdminSettings';
+import DailyTasks from './components/DailyTasks';
+import NotificationPanel from './components/NotificationPanel';
+import { getTask } from './services/pb';
 import './styles/index.css';
 
 export { useAuth };
 
-// Default groups
-const DEFAULT_GROUPS = [
+// Default groups (fallback)
+const INITIAL_GROUPS = [
   'Đội thợ 1',
   'Đội thợ 2',
   'Phòng thiết kế',
@@ -20,30 +25,52 @@ const DEFAULT_GROUPS = [
   'Ban giám đốc',
 ];
 
+function loadDepartments() {
+  try {
+    const saved = localStorage.getItem('task_departments');
+    if (saved) return JSON.parse(saved);
+  } catch { }
+  return INITIAL_GROUPS;
+}
+
+function saveDepartments(depts) {
+  localStorage.setItem('task_departments', JSON.stringify(depts));
+}
+
 // ===== DASHBOARD =====
 function Dashboard() {
-  const { user, isStaff } = useAuth();
+  const { user, isStaff, isDirector } = useAuth();
   const { tasks, loading, addTask, editTask, removeTask, reorderTasks } = useTasks();
+  const { notifications, unreadCount, markAllRead, markRead, clearAll } = useNotifications(user?.id);
 
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'group'
+  const [departments, setDepartments] = useState(loadDepartments);
+
+  // Save departments to localStorage whenever they change
+  useEffect(() => { saveDepartments(departments); }, [departments]);
 
   // Drag state
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
-  // Group name map for filter keys
-  const GROUP_MAP = {
-    group_doi_tho_1: 'Đội thợ 1',
-    group_doi_tho_2: 'Đội thợ 2',
-    group_phong_thiet_ke: 'Phòng thiết kế',
-    group_phong_kinh_doanh: 'Phòng kinh doanh',
-    group_phong_marketing: 'Phòng marketing',
-    group_ban_giam_doc: 'Ban giám đốc',
-  };
+
+  // Build GROUP_MAP dynamically from departments
+  const GROUP_MAP = useMemo(() => {
+    const map = {};
+    departments.forEach(dept => {
+      const key = 'group_' + dept.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+        .replace(/\s+/g, '_');
+      map[key] = dept;
+    });
+    return map;
+  }, [departments]);
 
   // Active tasks = not archived (status !== 'done')
   const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks]);
@@ -84,7 +111,7 @@ function Dashboard() {
         break;
     }
     return result;
-  }, [tasks, activeTasks, archivedTasks, filter, search, user]);
+  }, [tasks, activeTasks, archivedTasks, filter, search, user, GROUP_MAP]);
 
   // Group tasks by `group` field
   const groupedTasks = useMemo(() => {
@@ -138,14 +165,15 @@ function Dashboard() {
     groups: groupCounts,
   }), [activeTasks, archivedTasks, user, urgentItems, groupCounts]);
 
-  const LABELS = {
+  const LABELS = useMemo(() => ({
     all: 'Tất cả công việc',
     assigned_to_me: 'Việc của tôi',
     assigned_by_me: 'Việc đã giao',
+    daily: '📝 Việc cá nhân',
     urgent: '🔴 Việc khẩn cấp',
     archived: '📦 Lưu trữ',
     ...Object.fromEntries(Object.entries(GROUP_MAP).map(([k, v]) => [k, v])),
-  };
+  }), [GROUP_MAP]);
 
   async function handleAddTask(data) {
     await addTask(data);
@@ -199,7 +227,7 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <Layout filter={filter} onFilterChange={setFilter} taskCounts={taskCounts}>
+      <Layout filter={filter} onFilterChange={setFilter} taskCounts={taskCounts} departments={departments} onShowAdmin={() => setShowAdmin(true)}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 16 }}>
           <div style={{ fontSize: 32, animation: 'spin 1s linear infinite' }}>⟳</div>
           <p style={{ color: 'var(--text-muted)' }}>Đang tải công việc...</p>
@@ -209,7 +237,7 @@ function Dashboard() {
   }
 
   return (
-    <Layout filter={filter} onFilterChange={setFilter} taskCounts={taskCounts}>
+    <Layout filter={filter} onFilterChange={setFilter} taskCounts={taskCounts} departments={departments} onShowAdmin={() => setShowAdmin(true)}>
       {/* Header */}
       <header className="header">
         <div className="header-search">
@@ -217,6 +245,20 @@ function Dashboard() {
           <input type="text" placeholder="Tìm công việc..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="header-actions">
+          {/* Notifications */}
+          <NotificationPanel
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkAllRead={markAllRead}
+            onMarkRead={markRead}
+            onClearAll={clearAll}
+            onClickNotif={async (taskId) => {
+              try {
+                const t = await getTask(taskId);
+                setSelectedTask(t);
+              } catch (e) { console.error(e); }
+            }}
+          />
           {/* View mode toggle */}
           <div className="view-toggle">
             <button className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="Xem danh sách">
@@ -264,6 +306,11 @@ function Dashboard() {
         </div>
       )}
 
+      {/* ===== DAILY TASKS (personal) ===== */}
+      {(filter === 'all' || filter === 'assigned_to_me' || filter === 'daily') && (
+        <DailyTasks />
+      )}
+
       {/* Task grid */}
       <div className="task-grid-container">
         <div className="task-grid-header">
@@ -278,7 +325,7 @@ function Dashboard() {
             <p>
               {isStaff
                 ? 'Chưa có việc nào được giao cho bạn.'
-                : 'Bấm "+ Giao việc" để tạo công việc mới.'
+                : 'Bấm "+" để tạo công việc mới.'
               }
             </p>
           </div>
@@ -340,13 +387,26 @@ function Dashboard() {
 
       {/* Modals */}
       {selectedTask && (
-        <TaskDetail task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={handleUpdateTask} onDelete={handleDeleteTask} />
+        <TaskDetail
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onUpdate={handleUpdateTask}
+          onDelete={handleDeleteTask}
+          groups={departments}
+        />
       )}
       {showForm && (
         <TaskForm
           onClose={() => setShowForm(false)}
           onSubmit={handleAddTask}
-          groups={DEFAULT_GROUPS}
+          groups={departments}
+        />
+      )}
+      {showAdmin && (
+        <AdminSettings
+          onClose={() => setShowAdmin(false)}
+          departments={departments}
+          onDepartmentsChange={setDepartments}
         />
       )}
     </Layout>

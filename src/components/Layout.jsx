@@ -1,25 +1,28 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getInitials, getRoleLabel } from '../services/pb';
 
-// Department/group filters (replaces status filters)
-const DEPARTMENT_FILTERS = [
-    { key: 'group_doi_tho_1', label: 'Đội thợ 1', icon: '🔧' },
-    { key: 'group_doi_tho_2', label: 'Đội thợ 2', icon: '🔨' },
-    { key: 'group_phong_thiet_ke', label: 'Phòng thiết kế', icon: '🎨' },
-    { key: 'group_phong_kinh_doanh', label: 'Phòng kinh doanh', icon: '💼' },
-    { key: 'group_phong_marketing', label: 'Phòng marketing', icon: '📢' },
-    { key: 'group_ban_giam_doc', label: 'Ban giám đốc', icon: '🏢' },
-];
-
-export default function Layout({ children, filter, onFilterChange, taskCounts }) {
-    const { user, logout, roleLabel } = useAuth();
+export default function Layout({ children, filter, onFilterChange, taskCounts, departments = [], onShowAdmin }) {
+    const { user, logout, roleLabel, isDirector } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    // Build department filters dynamically
+    const departmentFilters = useMemo(() => {
+        const icons = ['🔧', '🔨', '🎨', '💼', '📢', '🏢', '📐', '🛠️', '📊', '🎯'];
+        return departments.map((dept, i) => {
+            const key = 'group_' + dept.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/\s+/g, '_');
+            return { key, label: dept, icon: icons[i % icons.length] };
+        });
+    }, [departments]);
 
     const mainFilters = [
         { key: 'all', label: 'Tất cả', icon: '📋', count: taskCounts?.all || 0 },
         { key: 'assigned_to_me', label: 'Việc của tôi', icon: '👤', count: taskCounts?.assignedToMe || 0 },
         { key: 'assigned_by_me', label: 'Việc đã giao', icon: '📤', count: taskCounts?.assignedByMe || 0 },
+        { key: 'daily', label: 'Việc cá nhân', icon: '📝', count: null },
         { key: 'urgent', label: 'Khẩn cấp', icon: '🔴', count: taskCounts?.urgent || 0 },
         { key: 'archived', label: 'Lưu trữ', icon: '📦', count: taskCounts?.archived || 0 },
     ];
@@ -73,7 +76,7 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
 
                     <div className="nav-section">
                         <div className="nav-section-title">Phòng ban / Đội</div>
-                        {DEPARTMENT_FILTERS.map(f => (
+                        {departmentFilters.map(f => (
                             <button
                                 key={f.key}
                                 className={`nav-item ${filter === f.key ? 'active' : ''}`}
@@ -90,6 +93,11 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
                 </nav>
 
                 <div className="sidebar-footer">
+                    {isDirector && onShowAdmin && (
+                        <button className="btn-admin" onClick={() => { onShowAdmin(); setSidebarOpen(false); }}>
+                            <span>⚙</span> Quản lý
+                        </button>
+                    )}
                     <button className="btn-logout" onClick={logout}>
                         <span>🚪</span> Đăng xuất
                     </button>

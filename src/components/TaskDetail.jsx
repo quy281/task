@@ -1,20 +1,37 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getComments, createComment, getInitials, timeAgo, getRoleLabel, formatDate } from '../services/pb';
+import { getComments, createComment, getInitials, timeAgo, getSubordinates, getRoleLabel, getRoleColor } from '../services/pb';
 import { useAuth } from '../hooks/useAuth';
 
 const STATUS_LABEL = {
     todo: 'Chờ làm', in_progress: 'Đang làm', done: 'Hoàn thành', overdue: 'Quá hạn',
 };
 
-export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
-    const { user } = useAuth();
+const CARD_COLORS = [
+    { name: 'default', hex: '#ffffff', label: 'Mặc định' },
+    { name: 'blue', hex: '#e8f0fe', label: 'Xanh dương' },
+    { name: 'green', hex: '#e6f7ed', label: 'Xanh lá' },
+    { name: 'yellow', hex: '#fef7e0', label: 'Vàng' },
+    { name: 'pink', hex: '#fde8ef', label: 'Hồng' },
+    { name: 'purple', hex: '#f0e6ff', label: 'Tím' },
+    { name: 'orange', hex: '#fff0e6', label: 'Cam' },
+];
+
+const DEFAULT_GROUPS = [
+    'Đội thợ 1', 'Đội thợ 2', 'Phòng thiết kế',
+    'Phòng kinh doanh', 'Phòng marketing', 'Ban giám đốc',
+];
+
+export default function TaskDetail({ task, onClose, onUpdate, onDelete, groups }) {
+    const { user, isStaff } = useAuth();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [sending, setSending] = useState(false);
     const [checklist, setChecklist] = useState(task.checklist || []);
     const [newItemText, setNewItemText] = useState('');
-    const [expandedItem, setExpandedItem] = useState(null); // id of item whose comments are open
+    const [expandedItem, setExpandedItem] = useState(null);
     const [itemComment, setItemComment] = useState('');
+    const [showSettings, setShowSettings] = useState(false);
+    const [subordinates, setSubordinates] = useState([]);
     const commentsEndRef = useRef(null);
 
     // Drag state
@@ -29,9 +46,16 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
     const touchMode = useRef(null);
     const listRef = useRef(null);
 
+    const availableGroups = groups || DEFAULT_GROUPS;
+
     useEffect(() => { loadComments(); }, [task.id]);
     useEffect(() => { commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [comments]);
     useEffect(() => { setChecklist(task.checklist || []); }, [task.id, task.checklist]);
+    useEffect(() => {
+        if (!isStaff) {
+            getSubordinates(user).then(setSubordinates).catch(console.error);
+        }
+    }, [user, isStaff]);
 
     async function loadComments() {
         try { setComments(await getComments(task.id)); } catch (err) { console.error(err); }
@@ -57,10 +81,6 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
         const newChecked = !updated[index].checked;
         updated[index] = { ...updated[index], checked: newChecked, status: newChecked ? 'done' : 'todo' };
         persistChecklist(updated);
-    }
-
-    function handleStatusChange(newStatus) {
-        onUpdate(task.id, { status: newStatus }).catch(err => console.error(err));
     }
 
     // Toggle urgent flag on checklist item
@@ -97,6 +117,29 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
 
     function handleItemKeyDown(e) {
         if (e.key === 'Enter') { e.preventDefault(); handleAddItem(); }
+    }
+
+    // ===== Inline edit handlers =====
+    function handleColorChange(color) {
+        onUpdate(task.id, { color });
+    }
+
+    function handlePriorityChange(priority) {
+        onUpdate(task.id, { priority });
+    }
+
+    function handleDeadlineChange(due_date) {
+        onUpdate(task.id, { due_date: due_date || null });
+    }
+
+    function handleGroupChange(group) {
+        onUpdate(task.id, { group: group || null });
+    }
+
+    function toggleAssignee(userId) {
+        const current = Array.isArray(task.assigned_to) ? task.assigned_to : task.assigned_to ? [task.assigned_to] : [];
+        const updated = current.includes(userId) ? current.filter(id => id !== userId) : [...current, userId];
+        onUpdate(task.id, { assigned_to: updated });
     }
 
     // ===== DRAG: vertical reorder + horizontal indent =====
@@ -174,20 +217,22 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
         setDraggingIdx(null); setDragOverIdx(null); setIndentPreview(null);
     }, [checklist, indentPreview]);
 
-    const assignedBy = task.expand?.assigned_by;
-    const assignedTo = task.expand?.assigned_to;
-    const assignees = Array.isArray(assignedTo) ? assignedTo : assignedTo ? [assignedTo] : [];
+    const assignedTo = Array.isArray(task.assigned_to) ? task.assigned_to : task.assigned_to ? [task.assigned_to] : [];
     const checkedCount = checklist.filter(c => c.checked).length;
-    const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
 
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content task-detail-modal" onClick={e => e.stopPropagation()}>
-                {/* Header - simplified */}
+                {/* Header */}
                 <div className="modal-header">
                     <div className="modal-header-top">
                         <h2 className="modal-title">{task.title}</h2>
                         <div style={{ display: 'flex', gap: 4 }}>
+                            <button
+                                className={`modal-action-btn settings ${showSettings ? 'active' : ''}`}
+                                onClick={() => setShowSettings(!showSettings)}
+                                title="Cài đặt"
+                            >⚙</button>
                             {task.status !== 'done' && (
                                 <button className="modal-action-btn archive" onClick={() => onUpdate(task.id, { status: 'done' })} title="Lưu trữ (hoàn thành)">📦</button>
                             )}
@@ -200,8 +245,99 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
                     {task.group && <span className="badge badge-group" style={{ marginTop: 6, display: 'inline-block' }}>🏷️ {task.group}</span>}
                 </div>
 
-                {/* Body - straight to checklist */}
+                {/* Body */}
                 <div className="modal-body">
+
+                    {/* ===== SETTINGS PANEL (color, priority, deadline, assignees, group) ===== */}
+                    {showSettings && (
+                        <div className="detail-settings-panel">
+                            {/* Color */}
+                            <div className="detail-setting-row">
+                                <label>🎨 Màu sắc</label>
+                                <div className="color-picker">
+                                    {CARD_COLORS.map(c => (
+                                        <div
+                                            key={c.name}
+                                            className={`color-dot ${task.color === c.name ? 'selected' : ''}`}
+                                            style={{ background: c.hex, border: c.hex === '#ffffff' ? '2px solid var(--border)' : undefined }}
+                                            onClick={() => handleColorChange(c.name)}
+                                            title={c.label}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Priority */}
+                            <div className="detail-setting-row">
+                                <label>⚡ Ưu tiên</label>
+                                <div className="detail-priority-picker">
+                                    {[
+                                        { key: 'low', label: 'Thấp', color: '#94a3b8' },
+                                        { key: 'medium', label: 'TB', color: '#f59e0b' },
+                                        { key: 'high', label: 'Cao', color: '#f97316' },
+                                        { key: 'urgent', label: '🔥 Gấp', color: '#ef4444' },
+                                    ].map(p => (
+                                        <button
+                                            key={p.key}
+                                            className={`detail-priority-btn ${task.priority === p.key ? 'active' : ''}`}
+                                            style={task.priority === p.key ? { background: p.color, color: 'white', borderColor: p.color } : {}}
+                                            onClick={() => handlePriorityChange(p.key)}
+                                        >{p.label}</button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Deadline */}
+                            <div className="detail-setting-row">
+                                <label>📅 Deadline</label>
+                                <input
+                                    type="date"
+                                    className="detail-date-input"
+                                    value={task.due_date ? task.due_date.split('T')[0] : ''}
+                                    onChange={e => handleDeadlineChange(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Group */}
+                            <div className="detail-setting-row">
+                                <label>🏷️ Nhóm</label>
+                                <select
+                                    className="detail-select"
+                                    value={task.group || ''}
+                                    onChange={e => handleGroupChange(e.target.value)}
+                                >
+                                    <option value="">-- Chọn nhóm --</option>
+                                    {availableGroups.map(g => <option key={g} value={g}>{g}</option>)}
+                                </select>
+                            </div>
+
+                            {/* Assignees */}
+                            {!isStaff && (
+                                <div className="detail-setting-row">
+                                    <label>👥 Giao cho</label>
+                                    <div className="detail-assignee-list">
+                                        {subordinates.length === 0 ? (
+                                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Không có nhân viên cấp dưới</span>
+                                        ) : subordinates.map(sub => (
+                                            <button
+                                                key={sub.id}
+                                                type="button"
+                                                className={`detail-assignee-chip ${assignedTo.includes(sub.id) ? 'selected' : ''}`}
+                                                onClick={() => toggleAssignee(sub.id)}
+                                            >
+                                                <span className="detail-assignee-avatar" style={{ background: getRoleColor(sub.role) }}>
+                                                    {getInitials(sub.name)}
+                                                </span>
+                                                <span>{sub.name}</span>
+                                                <span style={{ fontSize: 10, opacity: 0.7 }}>{getRoleLabel(sub.role)}</span>
+                                                {assignedTo.includes(sub.id) && <span>✓</span>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* ===== CHECKLIST with comments per item ===== */}
                     <div className="modal-checklist">
@@ -210,7 +346,7 @@ export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
                             <div className="checklist-progress" style={{ marginBottom: 10 }}>
                                 <div className="checklist-bar" style={{ height: 6 }}>
                                     <div className="checklist-bar-fill" style={{
-                                        width: `${(checkedCount / checklist.length) * 100}%`,
+                                        width: `${checklist.length > 0 ? (checkedCount / checklist.length) * 100 : 0}%`,
                                         background: checkedCount === checklist.length ? 'var(--status-done)' : 'var(--accent)',
                                     }} />
                                 </div>

@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
-// Quick-access accounts (click để login ngay)
-const QUICK_ACCOUNTS = [
-    { label: 'Admin MKG', username: 'admin', password: 'mkg20144', role: 'director', color: '#ef4444' },
-    { label: 'Thuỷ Lê', username: 'thuyle', password: 'Mkg2024!', role: 'manager', color: '#f59e0b' },
-];
-
 export default function LoginForm() {
     const { login } = useAuth();
     const [username, setUsername] = useState('');
@@ -14,11 +8,13 @@ export default function LoginForm() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    async function doLogin(uname, pwd) {
+    async function handleSubmit(e) {
+        e.preventDefault();
+        if (!username.trim() || !password) return;
         setError('');
         setLoading(true);
         try {
-            await login(uname, pwd);
+            await login(username.trim(), password);
         } catch (_) {
             setError('Sai tên đăng nhập hoặc mật khẩu');
         } finally {
@@ -26,43 +22,11 @@ export default function LoginForm() {
         }
     }
 
-    async function handleSubmit(e) {
-        e.preventDefault();
-        await doLogin(username.trim(), password);
-    }
-
     return (
         <div className="login-page">
             <div className="login-card">
                 <h1>📋 Giao Việc</h1>
                 <p>Hệ thống quản lý công việc MKG</p>
-
-                {/* Quick login buttons */}
-                <div className="demo-accounts">
-                    <h3>Đăng nhập nhanh</h3>
-                    {QUICK_ACCOUNTS.map(acc => (
-                        <button
-                            key={acc.username}
-                            className="demo-btn"
-                            onClick={() => doLogin(acc.username, acc.password)}
-                            disabled={loading}
-                        >
-                            <span className="role-dot" style={{ background: acc.color }} />
-                            <span>
-                                <strong>{acc.label}</strong>
-                                <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 6 }}>
-                                    ({acc.username})
-                                </span>
-                            </span>
-                        </button>
-                    ))}
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 12px' }}>
-                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>hoặc nhập thủ công</span>
-                    <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
