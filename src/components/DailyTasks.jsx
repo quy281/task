@@ -25,7 +25,7 @@ export default function DailyTasks() {
 
     function persist(updated) {
         setTasks(updated);
-        saveDailyTasks(user.id, updated);
+        if (user?.id) saveDailyTasks(user.id, updated);
     }
 
     function handleAdd() {
@@ -36,13 +36,14 @@ export default function DailyTasks() {
             done: false,
             created: new Date().toISOString(),
         };
-        persist([item, ...tasks]);
+        persist([...tasks, item]);
         setNewText('');
         inputRef.current?.focus();
     }
 
     function handleToggle(id) {
-        persist(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+        const updated = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+        persist(updated);
     }
 
     function handleDelete(id) {
@@ -64,7 +65,7 @@ export default function DailyTasks() {
     return (
         <div className="daily-tasks">
             <div className="daily-header">
-                <h3>📝 Việc cá nhân hôm nay</h3>
+                <h3>📝 Việc cá nhân</h3>
                 {doneCount > 0 && (
                     <button className="daily-clear-btn" onClick={handleClearDone}>
                         Xóa {doneCount} việc xong
@@ -88,17 +89,20 @@ export default function DailyTasks() {
                 )}
             </div>
 
-            {/* Pending tasks */}
+            {/* All tasks in order */}
             <div className="daily-list">
                 {pendingTasks.map(t => (
                     <div key={t.id} className="daily-item">
-                        <input
-                            type="checkbox"
-                            checked={false}
-                            onChange={() => handleToggle(t.id)}
-                        />
+                        <label className="daily-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={t.done}
+                                onChange={() => handleToggle(t.id)}
+                            />
+                            <span className="daily-checkmark" />
+                        </label>
                         <span className="daily-item-text">{t.text}</span>
-                        <button className="daily-item-del" onClick={() => handleDelete(t.id)}>✕</button>
+                        <button className="daily-item-del" onClick={() => handleDelete(t.id)} title="Xóa">✕</button>
                     </div>
                 ))}
             </div>
@@ -109,13 +113,16 @@ export default function DailyTasks() {
                     <div className="daily-done-label">✅ Đã xong ({doneTasks.length})</div>
                     {doneTasks.map(t => (
                         <div key={t.id} className="daily-item done">
-                            <input
-                                type="checkbox"
-                                checked={true}
-                                onChange={() => handleToggle(t.id)}
-                            />
+                            <label className="daily-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={t.done}
+                                    onChange={() => handleToggle(t.id)}
+                                />
+                                <span className="daily-checkmark" />
+                            </label>
                             <span className="daily-item-text">{t.text}</span>
-                            <button className="daily-item-del" onClick={() => handleDelete(t.id)}>✕</button>
+                            <button className="daily-item-del" onClick={() => handleDelete(t.id)} title="Xóa">✕</button>
                         </div>
                     ))}
                 </div>
@@ -123,7 +130,7 @@ export default function DailyTasks() {
 
             {tasks.length === 0 && (
                 <div className="daily-empty">
-                    Chưa có việc nào. Thêm việc cá nhân để theo dõi trong ngày.
+                    Chưa có việc nào — ghi nhanh việc cần làm trong ngày.
                 </div>
             )}
         </div>

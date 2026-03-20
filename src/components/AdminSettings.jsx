@@ -20,6 +20,12 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
     const [editDeptValue, setEditDeptValue] = useState('');
     const [savingUser, setSavingUser] = useState(null);
 
+    // Add user form
+    const [showAddUser, setShowAddUser] = useState(false);
+    const [newUser, setNewUser] = useState({ name: '', username: '', password: '', role: 'staff' });
+    const [addingUser, setAddingUser] = useState(false);
+    const [addError, setAddError] = useState('');
+
     useEffect(() => {
         loadUsers();
     }, []);
@@ -60,7 +66,7 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
         setEditingDept(null);
     }
 
-    // ===== Role management =====
+    // ===== User management =====
     async function handleRoleChange(userId, newRole) {
         setSavingUser(userId);
         try {
@@ -71,6 +77,56 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
             alert('Không thể cập nhật quyền: ' + err.message);
         } finally {
             setSavingUser(null);
+        }
+    }
+
+    async function handleAddUser() {
+        setAddError('');
+        if (!newUser.name.trim() || !newUser.username.trim() || !newUser.password.trim()) {
+            setAddError('Vui lòng điền đầy đủ thông tin');
+            return;
+        }
+        if (newUser.password.length < 8) {
+            setAddError('Mật khẩu tối thiểu 8 ký tự');
+            return;
+        }
+        setAddingUser(true);
+        try {
+            const email = newUser.username.trim().includes('@')
+                ? newUser.username.trim()
+                : `${newUser.username.trim()}@mkg.vn`;
+            const created = await pb.collection('task_users').create({
+                name: newUser.name.trim(),
+                username: newUser.username.trim(),
+                email: email,
+                password: newUser.password,
+                passwordConfirm: newUser.password,
+                role: newUser.role,
+                emailVisibility: true,
+            });
+            setUsers(prev => [...prev, created]);
+            setNewUser({ name: '', username: '', password: '', role: 'staff' });
+            setShowAddUser(false);
+        } catch (err) {
+            console.error('Failed to add user:', err);
+            const msg = err.response?.data || err.message;
+            if (JSON.stringify(msg).includes('unique')) {
+                setAddError('Tên đăng nhập hoặc email đã tồn tại');
+            } else {
+                setAddError('Lỗi: ' + (typeof msg === 'string' ? msg : JSON.stringify(msg).slice(0, 100)));
+            }
+        } finally {
+            setAddingUser(false);
+        }
+    }
+
+    async function handleDeleteUser(userId, name) {
+        if (!confirm(`Xóa nhân sự "${name}"? Hành động này không thể hoàn tác.`)) return;
+        try {
+            await pb.collection('task_users').delete(userId);
+            setUsers(users.filter(u => u.id !== userId));
+        } catch (err) {
+            alert('Không thể xóa: ' + err.message);
         }
     }
 
@@ -93,7 +149,7 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
                     <button
                         className={`admin-tab ${activeTab === 'roles' ? 'active' : ''}`}
                         onClick={() => setActiveTab('roles')}
-                    >👥 Phân quyền</button>
+                    >👥 Nhân sự & Quyền</button>
                 </div>
 
                 <div className="modal-body">
@@ -144,9 +200,56 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
                         </div>
                     )}
 
-                    {/* ===== ROLES TAB ===== */}
+                    {/* ===== USERS & ROLES TAB ===== */}
                     {activeTab === 'roles' && (
                         <div className="admin-section">
+                            {/* Add user button / form */}
+                            {!showAddUser ? (
+                                <button className="admin-add-user-btn" onClick={() => setShowAddUser(true)}>
+                                    + Thêm nhân sự mới
+                                </button>
+                            ) : (
+                                <div className="admin-add-user-form">
+                                    <h4>Thêm nhân sự</h4>
+                                    <div className="admin-form-grid">
+                                        <input
+                                            type="text"
+                                            placeholder="Họ tên *"
+                                            value={newUser.name}
+                                            onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Tên đăng nhập *"
+                                            value={newUser.username}
+                                            onChange={e => setNewUser({ ...newUser, username: e.target.value })}
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="Mật khẩu * (≥8 ký tự)"
+                                            value={newUser.password}
+                                            onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                                        />
+                                        <select
+                                            value={newUser.role}
+                                            onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                                        >
+                                            {ROLE_OPTIONS.map(r => (
+                                                <option key={r.value} value={r.value}>{r.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {addError && <div className="admin-form-error">{addError}</div>}
+                                    <div className="admin-form-actions">
+                                        <button className="admin-cancel-btn" onClick={() => { setShowAddUser(false); setAddError(''); }}>Hủy</button>
+                                        <button className="admin-add-btn" onClick={handleAddUser} disabled={addingUser}>
+                                            {addingUser ? 'Đang tạo...' : '+ Tạo tài khoản'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* User list */}
                             <div className="admin-user-list">
                                 {users.map(u => (
                                     <div key={u.id} className="admin-user-item">
@@ -159,16 +262,25 @@ export default function AdminSettings({ onClose, departments, onDepartmentsChang
                                                 <div className="admin-user-email">{u.email}</div>
                                             </div>
                                         </div>
-                                        <select
-                                            className="admin-role-select"
-                                            value={u.role || 'staff'}
-                                            onChange={e => handleRoleChange(u.id, e.target.value)}
-                                            disabled={u.id === user.id || savingUser === u.id}
-                                        >
-                                            {ROLE_OPTIONS.map(r => (
-                                                <option key={r.value} value={r.value}>{r.label}</option>
-                                            ))}
-                                        </select>
+                                        <div className="admin-user-controls">
+                                            <select
+                                                className="admin-role-select"
+                                                value={u.role || 'staff'}
+                                                onChange={e => handleRoleChange(u.id, e.target.value)}
+                                                disabled={u.id === user.id || savingUser === u.id}
+                                            >
+                                                {ROLE_OPTIONS.map(r => (
+                                                    <option key={r.value} value={r.value}>{r.label}</option>
+                                                ))}
+                                            </select>
+                                            {u.id !== user.id && (
+                                                <button
+                                                    className="admin-icon-btn danger"
+                                                    onClick={() => handleDeleteUser(u.id, u.name)}
+                                                    title="Xóa nhân sự"
+                                                >🗑️</button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                                 {users.length === 0 && (
