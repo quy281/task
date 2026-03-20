@@ -10,12 +10,12 @@ import TaskForm from './components/TaskForm';
 import AdminSettings from './components/AdminSettings';
 import DailyTasks from './components/DailyTasks';
 import NotificationPanel from './components/NotificationPanel';
-import { getTask } from './services/pb';
+import { getTask, getConfig, setConfig } from './services/pb';
 import './styles/index.css';
 
 export { useAuth };
 
-// Default groups (fallback)
+// Default groups (fallback if PB not available)
 const INITIAL_GROUPS = [
   'Đội thợ 1',
   'Đội thợ 2',
@@ -24,18 +24,6 @@ const INITIAL_GROUPS = [
   'Phòng marketing',
   'Ban giám đốc',
 ];
-
-function loadDepartments() {
-  try {
-    const saved = localStorage.getItem('task_departments');
-    if (saved) return JSON.parse(saved);
-  } catch { }
-  return INITIAL_GROUPS;
-}
-
-function saveDepartments(depts) {
-  localStorage.setItem('task_departments', JSON.stringify(depts));
-}
 
 // ===== DASHBOARD =====
 function Dashboard() {
@@ -49,10 +37,27 @@ function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'group'
-  const [departments, setDepartments] = useState(loadDepartments);
+  const [departments, setDepartments] = useState(INITIAL_GROUPS);
 
-  // Save departments to localStorage whenever they change
-  useEffect(() => { saveDepartments(departments); }, [departments]);
+  // Load departments from PocketBase (online sync)
+  useEffect(() => {
+    (async () => {
+      const cfg = await getConfig('departments');
+      if (cfg?.value && Array.isArray(cfg.value)) {
+        setDepartments(cfg.value);
+      }
+    })();
+  }, []);
+
+  // Save departments to PocketBase when changed via admin
+  async function handleUpdateDepartments(newDepts) {
+    setDepartments(newDepts);
+    try {
+      await setConfig('departments', newDepts);
+    } catch (err) {
+      console.error('Failed to save departments online:', err);
+    }
+  }
 
   // Drag state
   const dragItem = useRef(null);
@@ -406,7 +411,7 @@ function Dashboard() {
         <AdminSettings
           onClose={() => setShowAdmin(false)}
           departments={departments}
-          onDepartmentsChange={setDepartments}
+          onDepartmentsChange={handleUpdateDepartments}
         />
       )}
     </Layout>

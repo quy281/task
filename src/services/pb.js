@@ -164,4 +164,25 @@ export function formatDate(dateStr) {
   });
 }
 
+// ===== CONFIG (shared online settings) =====
+export async function getConfig(key) {
+  try {
+    const result = await pb.collection('task_config').getList(1, 1, {
+      filter: `key = "${key}"`,
+    });
+    return result.items[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function setConfig(key, value) {
+  const existing = await getConfig(key);
+  if (existing) {
+    return await pb.collection('task_config').update(existing.id, { value });
+  } else {
+    return await pb.collection('task_config').create({ key, value });
+  }
+}
+
 export default pb;

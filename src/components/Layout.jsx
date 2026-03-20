@@ -93,7 +93,7 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
                 </nav>
 
                 <div className="sidebar-footer">
-                    {isDirector && onShowAdmin && (
+                    {(isDirector || user?.role === 'hr') && onShowAdmin && (
                         <button className="btn-admin" onClick={() => { onShowAdmin(); setSidebarOpen(false); }}>
                             <span>⚙</span> Quản lý
                         </button>
