@@ -2,7 +2,7 @@
 
 const DEMO_USERS = [
     { id: 'u0', name: 'Admin MKG', email: 'admin@mkg.vn', username: 'admin', password: 'mkg20144', role: 'director', department: 'Ban Giám đốc' },
-    { id: 'u00', name: 'Thuỷ Lê', email: 'thuyle@mkg.vn', username: 'thuyle', password: 'mkg2024', role: 'manager', department: 'Phòng Marketing' },
+    { id: 'u00', name: 'Thuỷ Lê', email: 'thuyle@mkg.vn', username: 'thuyle', password: 'mkg2024', role: 'assistant_director', department: 'Ban Giám đốc' },
     { id: 'u1', name: 'Nguyễn Văn An', email: 'giamdoc@mkg.vn', username: 'giamdoc', password: '12345678', role: 'director', department: 'Ban Giám đốc' },
     { id: 'u2', name: 'Trần Thị Bình', email: 'truongphong1@mkg.vn', username: 'truongphong1', password: '12345678', role: 'manager', department: 'Phòng Kinh doanh' },
     { id: 'u3', name: 'Phạm Minh Đức', email: 'truongphong2@mkg.vn', username: 'truongphong2', password: '12345678', role: 'manager', department: 'Phòng Marketing' },

@@ -23,7 +23,7 @@ const DEFAULT_GROUPS = [
 // ===== DASHBOARD =====
 function Dashboard() {
   const { user, isStaff } = useAuth();
-  const { tasks, loading, addTask, editTask, reorderTasks } = useTasks();
+  const { tasks, loading, addTask, editTask, removeTask, reorderTasks } = useTasks();
 
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -35,9 +35,23 @@ function Dashboard() {
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  // Group name map for filter keys
+  const GROUP_MAP = {
+    group_doi_tho_1: 'Đội thợ 1',
+    group_doi_tho_2: 'Đội thợ 2',
+    group_phong_thiet_ke: 'Phòng thiết kế',
+    group_phong_kinh_doanh: 'Phòng kinh doanh',
+    group_phong_marketing: 'Phòng marketing',
+    group_ban_giam_doc: 'Ban giám đốc',
+  };
+
+  // Active tasks = not archived (status !== 'done')
+  const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks]);
+  const archivedTasks = useMemo(() => tasks.filter(t => t.status === 'done'), [tasks]);
 
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
+    let source = filter === 'archived' ? archivedTasks : activeTasks;
+    let result = [...source];
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(t =>
@@ -54,23 +68,23 @@ function Dashboard() {
       case 'assigned_by_me':
         result = result.filter(t => t.assigned_by === user.id);
         break;
-      case 'todo': result = result.filter(t => t.status === 'todo'); break;
-      case 'in_progress': result = result.filter(t => t.status === 'in_progress'); break;
-      case 'done': result = result.filter(t => t.status === 'done'); break;
       case 'urgent':
-        result = result.filter(t =>
+        result = activeTasks.filter(t =>
           (t.checklist || []).some(c => c.urgent && !c.checked && c.status !== 'done')
         );
         break;
-      case 'overdue':
-        result = result.filter(t =>
-          t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done'
-        );
+      case 'archived':
+        // already using archivedTasks as source
         break;
-      default: break;
+      default:
+        // Check if it's a group filter
+        if (filter.startsWith('group_') && GROUP_MAP[filter]) {
+          result = result.filter(t => t.group === GROUP_MAP[filter]);
+        }
+        break;
     }
     return result;
-  }, [tasks, filter, search, user]);
+  }, [tasks, activeTasks, archivedTasks, filter, search, user]);
 
   // Group tasks by `group` field
   const groupedTasks = useMemo(() => {
@@ -80,7 +94,6 @@ function Dashboard() {
       if (!groups[g]) groups[g] = [];
       groups[g].push(t);
     });
-    // Sort: named groups first, then ungrouped
     const sorted = {};
     Object.keys(groups).sort((a, b) => {
       if (a === 'Chưa phân nhóm') return 1;
@@ -93,7 +106,7 @@ function Dashboard() {
   // Collect all urgent checklist items across tasks for approval queue
   const urgentItems = useMemo(() => {
     const items = [];
-    tasks.forEach(t => {
+    activeTasks.forEach(t => {
       (t.checklist || []).forEach((c, ci) => {
         if (c.urgent && !c.checked && c.status !== 'done') {
           items.push({ task: t, item: c, itemIndex: ci });
@@ -101,33 +114,37 @@ function Dashboard() {
       });
     });
     return items;
-  }, [tasks]);
+  }, [activeTasks]);
+
+  // Per-group counts
+  const groupCounts = useMemo(() => {
+    const counts = {};
+    activeTasks.forEach(t => {
+      const g = t.group;
+      if (g) counts[g] = (counts[g] || 0) + 1;
+    });
+    return counts;
+  }, [activeTasks]);
 
   const taskCounts = useMemo(() => ({
-    all: tasks.length,
+    all: activeTasks.length,
     urgent: urgentItems.length,
-    assignedToMe: tasks.filter(t => {
+    archived: archivedTasks.length,
+    assignedToMe: activeTasks.filter(t => {
       const to = t.assigned_to;
       return Array.isArray(to) ? to.includes(user.id) : to === user.id;
     }).length,
-    assignedByMe: tasks.filter(t => t.assigned_by === user.id).length,
-    todo: tasks.filter(t => t.status === 'todo').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    done: tasks.filter(t => t.status === 'done').length,
-    overdue: tasks.filter(t =>
-      t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done'
-    ).length,
-  }), [tasks, user, urgentItems]);
+    assignedByMe: activeTasks.filter(t => t.assigned_by === user.id).length,
+    groups: groupCounts,
+  }), [activeTasks, archivedTasks, user, urgentItems, groupCounts]);
 
   const LABELS = {
     all: 'Tất cả công việc',
     assigned_to_me: 'Việc của tôi',
     assigned_by_me: 'Việc đã giao',
     urgent: '🔴 Việc khẩn cấp',
-    todo: 'Chờ làm',
-    in_progress: 'Đang làm',
-    done: 'Hoàn thành',
-    overdue: 'Quá hạn',
+    archived: '📦 Lưu trữ',
+    ...Object.fromEntries(Object.entries(GROUP_MAP).map(([k, v]) => [k, v])),
   };
 
   async function handleAddTask(data) {
@@ -139,6 +156,16 @@ function Dashboard() {
     await editTask(id, updates);
     if (selectedTask?.id === id) {
       setSelectedTask(prev => prev ? { ...prev, ...updates } : prev);
+    }
+  }
+
+  async function handleDeleteTask(id) {
+    if (!confirm('Xóa công việc này?')) return;
+    try {
+      await removeTask(id);
+      setSelectedTask(null);
+    } catch (err) {
+      console.error('Failed to delete task:', err);
     }
   }
 
@@ -313,7 +340,7 @@ function Dashboard() {
 
       {/* Modals */}
       {selectedTask && (
-        <TaskDetail task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={handleUpdateTask} />
+        <TaskDetail task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={handleUpdateTask} onDelete={handleDeleteTask} />
       )}
       {showForm && (
         <TaskForm

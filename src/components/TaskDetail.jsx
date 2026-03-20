@@ -6,7 +6,7 @@ const STATUS_LABEL = {
     todo: 'Chờ làm', in_progress: 'Đang làm', done: 'Hoàn thành', overdue: 'Quá hạn',
 };
 
-export default function TaskDetail({ task, onClose, onUpdate }) {
+export default function TaskDetail({ task, onClose, onUpdate, onDelete }) {
     const { user } = useAuth();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
@@ -187,7 +187,15 @@ export default function TaskDetail({ task, onClose, onUpdate }) {
                 <div className="modal-header">
                     <div className="modal-header-top">
                         <h2 className="modal-title">{task.title}</h2>
-                        <button className="modal-close" onClick={onClose}>✕</button>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                            {task.status !== 'done' && (
+                                <button className="modal-action-btn archive" onClick={() => onUpdate(task.id, { status: 'done' })} title="Lưu trữ (hoàn thành)">📦</button>
+                            )}
+                            {onDelete && (
+                                <button className="modal-action-btn delete" onClick={() => onDelete(task.id)} title="Xóa">🗑️</button>
+                            )}
+                            <button className="modal-close" onClick={onClose}>✕</button>
+                        </div>
                     </div>
                     {task.group && <span className="badge badge-group" style={{ marginTop: 6, display: 'inline-block' }}>🏷️ {task.group}</span>}
                 </div>

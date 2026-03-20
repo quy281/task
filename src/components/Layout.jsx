@@ -2,21 +2,26 @@ import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getInitials, getRoleLabel } from '../services/pb';
 
+// Department/group filters (replaces status filters)
+const DEPARTMENT_FILTERS = [
+    { key: 'group_doi_tho_1', label: 'Đội thợ 1', icon: '🔧' },
+    { key: 'group_doi_tho_2', label: 'Đội thợ 2', icon: '🔨' },
+    { key: 'group_phong_thiet_ke', label: 'Phòng thiết kế', icon: '🎨' },
+    { key: 'group_phong_kinh_doanh', label: 'Phòng kinh doanh', icon: '💼' },
+    { key: 'group_phong_marketing', label: 'Phòng marketing', icon: '📢' },
+    { key: 'group_ban_giam_doc', label: 'Ban giám đốc', icon: '🏢' },
+];
+
 export default function Layout({ children, filter, onFilterChange, taskCounts }) {
     const { user, logout, roleLabel } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const filters = [
+    const mainFilters = [
         { key: 'all', label: 'Tất cả', icon: '📋', count: taskCounts?.all || 0 },
         { key: 'assigned_to_me', label: 'Việc của tôi', icon: '👤', count: taskCounts?.assignedToMe || 0 },
         { key: 'assigned_by_me', label: 'Việc đã giao', icon: '📤', count: taskCounts?.assignedByMe || 0 },
-    ];
-
-    const statusFilters = [
-        { key: 'todo', label: 'Chờ làm', icon: '⏳', count: taskCounts?.todo || 0 },
-        { key: 'in_progress', label: 'Đang làm', icon: '🔄', count: taskCounts?.inProgress || 0 },
-        { key: 'done', label: 'Hoàn thành', icon: '✅', count: taskCounts?.done || 0 },
-        { key: 'overdue', label: 'Quá hạn', icon: '⚠️', count: taskCounts?.overdue || 0 },
+        { key: 'urgent', label: 'Khẩn cấp', icon: '🔴', count: taskCounts?.urgent || 0 },
+        { key: 'archived', label: 'Lưu trữ', icon: '📦', count: taskCounts?.archived || 0 },
     ];
 
     // Bottom nav tabs (mobile)
@@ -24,7 +29,7 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
         { key: 'all', label: 'Tất cả', icon: '📋' },
         { key: 'assigned_to_me', label: 'Của tôi', icon: '👤' },
         { key: 'urgent', label: 'Khẩn cấp', icon: '🔴' },
-        { key: 'done', label: 'Xong', icon: '✅' },
+        { key: 'archived', label: 'Lưu trữ', icon: '📦' },
         { key: '_menu', label: 'Menu', icon: '☰' },
     ];
 
@@ -53,7 +58,7 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
                 <nav className="sidebar-nav">
                     <div className="nav-section">
                         <div className="nav-section-title">Bộ lọc</div>
-                        {filters.map(f => (
+                        {mainFilters.map(f => (
                             <button
                                 key={f.key}
                                 className={`nav-item ${filter === f.key ? 'active' : ''}`}
@@ -61,14 +66,14 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
                             >
                                 <span>{f.icon}</span>
                                 <span>{f.label}</span>
-                                <span className="count">{f.count}</span>
+                                {f.count > 0 && <span className="count">{f.count}</span>}
                             </button>
                         ))}
                     </div>
 
                     <div className="nav-section">
-                        <div className="nav-section-title">Trạng thái</div>
-                        {statusFilters.map(f => (
+                        <div className="nav-section-title">Phòng ban / Đội</div>
+                        {DEPARTMENT_FILTERS.map(f => (
                             <button
                                 key={f.key}
                                 className={`nav-item ${filter === f.key ? 'active' : ''}`}
@@ -76,7 +81,9 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
                             >
                                 <span>{f.icon}</span>
                                 <span>{f.label}</span>
-                                <span className="count">{f.count}</span>
+                                {(taskCounts?.groups?.[f.label] || 0) > 0 && (
+                                    <span className="count">{taskCounts.groups[f.label]}</span>
+                                )}
                             </button>
                         ))}
                     </div>

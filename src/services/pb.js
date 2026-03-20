@@ -30,7 +30,7 @@ export function onAuthChange(callback) {
 }
 
 // ===== ROLE HELPERS =====
-const ROLE_HIERARCHY = { director: 3, manager: 2, staff: 1 };
+const ROLE_HIERARCHY = { director: 3, assistant_director: 2.5, manager: 2, staff: 1 };
 
 export function canAssignTo(currentUser, targetUser) {
   return (ROLE_HIERARCHY[currentUser.role] || 0) > (ROLE_HIERARCHY[targetUser.role] || 0);
@@ -39,6 +39,7 @@ export function canAssignTo(currentUser, targetUser) {
 export function getRoleLabel(role) {
   const labels = {
     director: 'Giám đốc',
+    assistant_director: 'Trợ lý GĐ',
     manager: 'Trưởng phòng',
     staff: 'Nhân viên'
   };
@@ -46,7 +47,7 @@ export function getRoleLabel(role) {
 }
 
 export function getRoleColor(role) {
-  const colors = { director: '#ef4444', manager: '#f59e0b', staff: '#3b82f6' };
+  const colors = { director: '#ef4444', assistant_director: '#a855f7', manager: '#f59e0b', staff: '#3b82f6' };
   return colors[role] || '#94a3b8';
 }
 
