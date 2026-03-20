@@ -62,10 +62,15 @@ export async function getSubordinates(currentUser) {
 
 // ===== TASKS =====
 export async function getTasks(filter = '') {
-  return await pb.collection('tasks').getFullList({
-    sort: '-id',
-    filter: filter || undefined,
-  });
+  try {
+    const result = await pb.collection('tasks').getList(1, 500, {
+      filter: filter || undefined,
+    });
+    return result.items;
+  } catch (err) {
+    console.error('getTasks error:', err);
+    return [];
+  }
 }
 
 export async function getTask(id) {

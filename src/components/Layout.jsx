@@ -19,6 +19,23 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
         { key: 'overdue', label: 'Quá hạn', icon: '⚠️', count: taskCounts?.overdue || 0 },
     ];
 
+    // Bottom nav tabs (mobile)
+    const bottomTabs = [
+        { key: 'all', label: 'Tất cả', icon: '📋' },
+        { key: 'assigned_to_me', label: 'Của tôi', icon: '👤' },
+        { key: 'urgent', label: 'Khẩn cấp', icon: '🔴' },
+        { key: 'done', label: 'Xong', icon: '✅' },
+        { key: '_menu', label: 'Menu', icon: '☰' },
+    ];
+
+    function handleBottomTab(key) {
+        if (key === '_menu') {
+            setSidebarOpen(prev => !prev);
+        } else {
+            onFilterChange(key);
+        }
+    }
+
     return (
         <div className="app-layout">
             {/* Sidebar */}
@@ -77,17 +94,27 @@ export default function Layout({ children, filter, onFilterChange, taskCounts })
                 {children}
             </main>
 
-            {/* Mobile overlay */}
+            {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div
-                    style={{
-                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)',
-                        zIndex: 99, display: 'none',
-                    }}
                     className="sidebar-overlay"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
+
+            {/* Bottom Navigation (mobile) */}
+            <nav className="bottom-nav">
+                {bottomTabs.map(tab => (
+                    <button
+                        key={tab.key}
+                        className={`bottom-nav-item ${filter === tab.key ? 'active' : ''} ${tab.key === '_menu' && sidebarOpen ? 'active' : ''}`}
+                        onClick={() => handleBottomTab(tab.key)}
+                    >
+                        <span className="bottom-nav-icon">{tab.icon}</span>
+                        <span className="bottom-nav-label">{tab.label}</span>
+                    </button>
+                ))}
+            </nav>
         </div>
     );
 }

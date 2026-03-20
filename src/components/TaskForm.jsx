@@ -12,7 +12,7 @@ const CARD_COLORS = [
     { name: 'orange', hex: '#fff0e6' },
 ];
 
-export default function TaskForm({ onClose, onSubmit }) {
+export default function TaskForm({ onClose, onSubmit, groups = [] }) {
     const { user } = useAuth();
     const [subordinates, setSubordinates] = useState([]);
     const [title, setTitle] = useState('');
@@ -23,6 +23,7 @@ export default function TaskForm({ onClose, onSubmit }) {
     const [color, setColor] = useState('default');
     const [checklistItems, setChecklistItems] = useState([]);
     const [newItem, setNewItem] = useState('');
+    const [group, setGroup] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -76,6 +77,7 @@ export default function TaskForm({ onClose, onSubmit }) {
                 due_date: dueDate || null,
                 color,
                 checklist: checklistItems,
+                group: group || null,
             });
             onClose();
         } catch (err) {
@@ -136,6 +138,15 @@ export default function TaskForm({ onClose, onSubmit }) {
                                     onChange={e => setDueDate(e.target.value)}
                                 />
                             </div>
+                        </div>
+
+                        {/* Group */}
+                        <div className="form-group">
+                            <label>Nhóm / Phòng ban</label>
+                            <select value={group} onChange={e => setGroup(e.target.value)}>
+                                <option value="">-- Chọn nhóm --</option>
+                                {groups.map(g => <option key={g} value={g}>{g}</option>)}
+                            </select>
                         </div>
 
                         {/* Assign to */}

@@ -11,22 +11,31 @@ const PRIORITY_CLASS = { low: 'badge-low', medium: 'badge-medium', high: 'badge-
 const PRIORITY_LABEL = { low: 'Thấp', medium: 'TB', high: 'Cao', urgent: '🔥 Gấp' };
 const STATUS_ICONS = { todo: '○', in_progress: '◐', done: '✓', fail: '✕' };
 
-export default function TaskCard({ task, latestComment, onClick }) {
+export default function TaskCard({ task, index, isDragOver, onClick, onDragStart, onDragOver, onDragEnd, latestComment }) {
     const checklist = task.checklist || [];
-    const doneCount = checklist.filter(c => c.status === 'done').length;
+    const doneCount = checklist.filter(c => c.checked || c.status === 'done').length;
     const totalCount = checklist.length;
     const progress = totalCount > 0 ? (doneCount / totalCount) * 100 : 0;
+    const hasUrgent = checklist.some(c => c.urgent);
 
     const assignedTo = task.expand?.assigned_to;
     const assignees = Array.isArray(assignedTo) ? assignedTo : assignedTo ? [assignedTo] : [];
     const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
 
     return (
-        <div className={`task-card ${COLOR_MAP[task.color] || ''}`} onClick={() => onClick?.(task)}>
+        <div
+            className={`task-card ${COLOR_MAP[task.color] || ''} ${isDragOver ? 'drag-over' : ''}`}
+            draggable
+            onDragStart={e => onDragStart?.(e, index)}
+            onDragOver={e => onDragOver?.(e, index)}
+            onDragEnd={e => onDragEnd?.(e)}
+            onClick={() => onClick?.(task)}
+        >
             {/* Header */}
             <div className="task-card-header">
                 <div className="task-card-title">{task.title}</div>
                 <div className="task-card-badges">
+                    {hasUrgent && <span className="badge badge-urgent-flag">🔴 Khẩn</span>}
                     <span className={`badge ${STATUS_CLASS[isOverdue ? 'overdue' : task.status]}`}>
                         {isOverdue ? 'Quá hạn' : STATUS_LABEL[task.status]}
                     </span>
@@ -50,23 +59,26 @@ export default function TaskCard({ task, latestComment, onClick }) {
                         </div>
                     </div>
                     <div style={{ marginTop: 6 }}>
-                        {checklist.slice(0, 4).map((item, i) => (
-                            <div
-                                key={i}
-                                className="ecl-preview-item"
-                                data-level={item.level || 0}
-                                data-status={item.status || 'todo'}
-                            >
-                                <span className="ecl-preview-status" data-status={item.status || 'todo'}>
-                                    {STATUS_ICONS[item.status || 'todo']}
-                                </span>
-                                <span className="ecl-preview-text">{item.text}</span>
-                                <span className="ecl-preview-icons">
-                                    {(item.comments?.length > 0) && <span className="has-cmt" title={`${item.comments.length} trao đổi`}>💬</span>}
-                                    {item.status === 'fail' && <span title="Lỗi">⚠</span>}
-                                </span>
-                            </div>
-                        ))}
+                        {checklist.slice(0, 4).map((item, i) => {
+                            const isDone = item.checked || item.status === 'done';
+                            return (
+                                <div
+                                    key={i}
+                                    className="ecl-preview-item"
+                                    data-level={item.level || 0}
+                                    data-status={isDone ? 'done' : (item.status || 'todo')}
+                                >
+                                    <span className="ecl-preview-status" data-status={isDone ? 'done' : (item.status || 'todo')}>
+                                        {isDone ? '✅' : STATUS_ICONS[item.status || 'todo']}
+                                    </span>
+                                    <span className={`ecl-preview-text ${isDone ? 'ecl-done' : ''}`}>{item.text}</span>
+                                    <span className="ecl-preview-icons">
+                                        {item.urgent && <span className="ecl-urgent" title="Khẩn cấp">🔴</span>}
+                                        {(item.comments?.length > 0) && <span className="has-cmt" title={`${item.comments.length} trao đổi`}>💬</span>}
+                                    </span>
+                                </div>
+                            );
+                        })}
                         {checklist.length > 4 && (
                             <div style={{ fontSize: 11.5, color: 'var(--text-muted)', paddingTop: 2 }}>
                                 +{checklist.length - 4} mục nữa...
