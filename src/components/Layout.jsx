@@ -22,7 +22,6 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
         { key: 'all', label: 'Tất cả', icon: '📋', count: taskCounts?.all || 0 },
         { key: 'assigned_to_me', label: 'Việc của tôi', icon: '👤', count: taskCounts?.assignedToMe || 0 },
         { key: 'assigned_by_me', label: 'Việc đã giao', icon: '📤', count: taskCounts?.assignedByMe || 0 },
-        { key: 'daily', label: 'Việc cá nhân', icon: '📝', count: null },
         { key: 'urgent', label: 'Khẩn cấp', icon: '🔴', count: taskCounts?.urgent || 0 },
         { key: 'archived', label: 'Lưu trữ', icon: '📦', count: taskCounts?.archived || 0 },
     ];

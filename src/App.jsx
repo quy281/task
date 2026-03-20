@@ -8,7 +8,6 @@ import TaskCard from './components/TaskCard';
 import TaskDetail from './components/TaskDetail';
 import TaskForm from './components/TaskForm';
 import AdminSettings from './components/AdminSettings';
-import DailyTasks from './components/DailyTasks';
 import NotificationPanel from './components/NotificationPanel';
 import { getTask, getConfig, setConfig } from './services/pb';
 import './styles/index.css';
@@ -174,7 +173,6 @@ function Dashboard() {
     all: 'Tất cả công việc',
     assigned_to_me: 'Việc của tôi',
     assigned_by_me: 'Việc đã giao',
-    daily: '📝 Việc cá nhân',
     urgent: '🔴 Việc khẩn cấp',
     archived: '📦 Lưu trữ',
     ...Object.fromEntries(Object.entries(GROUP_MAP).map(([k, v]) => [k, v])),
@@ -309,11 +307,6 @@ function Dashboard() {
             ))}
           </div>
         </div>
-      )}
-
-      {/* ===== DAILY TASKS (personal) ===== */}
-      {(filter === 'all' || filter === 'assigned_to_me' || filter === 'daily') && (
-        <DailyTasks />
       )}
 
       {/* Task grid */}
