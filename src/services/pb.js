@@ -54,7 +54,13 @@ export function getRoleColor(role) {
 
 // ===== USERS =====
 export async function getUsers() {
-  return await pb.collection('task_users').getFullList({ sort: '-role,name' });
+  try {
+    const result = await pb.collection('task_users').getList(1, 500);
+    return result.items;
+  } catch (err) {
+    console.error('getUsers error:', err);
+    return [];
+  }
 }
 
 export async function getSubordinates(currentUser) {
@@ -93,11 +99,16 @@ export async function deleteTask(id) {
 
 // ===== COMMENTS =====
 export async function getComments(taskId) {
-  return await pb.collection('task_comments').getFullList({
-    filter: `task = "${taskId}"`,
-    sort: 'id',
-    expand: 'author',
-  });
+  try {
+    const result = await pb.collection('task_comments').getList(1, 500, {
+      filter: `task = "${taskId}"`,
+      expand: 'author',
+    });
+    return result.items;
+  } catch (err) {
+    console.error('getComments error:', err);
+    return [];
+  }
 }
 
 export async function getLatestComment(taskId) {

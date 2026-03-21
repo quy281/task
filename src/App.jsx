@@ -9,7 +9,9 @@ import TaskDetail from './components/TaskDetail';
 import TaskForm from './components/TaskForm';
 import AdminSettings from './components/AdminSettings';
 import NotificationPanel from './components/NotificationPanel';
-import { getTask, getConfig, setConfig } from './services/pb';
+import DailyBoard from './components/DailyBoard';
+import { IconSearch, IconPlus, IconList, IconGrid, IconCalendar, IconTag, IconArchive } from './components/Icons';
+import { getTask, getUsers, getConfig, setConfig } from './services/pb';
 import './styles/index.css';
 
 export { useAuth };
@@ -35,8 +37,9 @@ function Dashboard() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [viewMode, setViewMode] = useState('list'); // 'list' | 'group'
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'group' | 'daily'
   const [departments, setDepartments] = useState(INITIAL_GROUPS);
+  const [allUsers, setAllUsers] = useState([]);
 
   // Load departments from PocketBase (online sync)
   useEffect(() => {
@@ -45,6 +48,9 @@ function Dashboard() {
       if (cfg?.value && Array.isArray(cfg.value)) {
         setDepartments(cfg.value);
       }
+      // Fetch all users for DailyBoard
+      const users = await getUsers();
+      setAllUsers(users);
     })();
   }, []);
 
@@ -244,7 +250,7 @@ function Dashboard() {
       {/* Header */}
       <header className="header">
         <div className="header-search">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><IconSearch /></span>
           <input type="text" placeholder="Tìm công việc..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="header-actions">
@@ -265,15 +271,18 @@ function Dashboard() {
           {/* View mode toggle */}
           <div className="view-toggle">
             <button className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="Xem danh sách">
-              ☰
+              <IconList />
             </button>
             <button className={`view-toggle-btn ${viewMode === 'group' ? 'active' : ''}`} onClick={() => setViewMode('group')} title="Xem theo nhóm">
-              ▤
+              <IconGrid />
+            </button>
+            <button className={`view-toggle-btn ${viewMode === 'daily' ? 'active' : ''}`} onClick={() => setViewMode('daily')} title="Bảng phân công theo ngày">
+              <IconCalendar />
             </button>
           </div>
           {!isStaff && (
             <button className="btn-create desktop-only" onClick={() => setShowForm(true)}>
-              <span>+</span> Giao việc
+              <IconPlus /> Giao việc
             </button>
           )}
         </div>
@@ -309,76 +318,85 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Task grid */}
-      <div className="task-grid-container">
-        <div className="task-grid-header">
-          <h2>{LABELS[filter]}</h2>
-          <span className="task-count">{filteredTasks.length} công việc</span>
-        </div>
+      {/* Task grid / Daily board */}
+      {viewMode === 'daily' ? (
+        <DailyBoard
+          tasks={activeTasks}
+          onUpdateTask={handleUpdateTask}
+          allUsers={allUsers}
+          onSelectTask={setSelectedTask}
+        />
+      ) : (
+        <div className="task-grid-container">
+          <div className="task-grid-header">
+            <h2>{LABELS[filter]}</h2>
+            <span className="task-count">{filteredTasks.length} công việc</span>
+          </div>
 
-        {filteredTasks.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📭</div>
-            <h3>Chưa có công việc nào</h3>
-            <p>
-              {isStaff
-                ? 'Chưa có việc nào được giao cho bạn.'
-                : 'Bấm "+" để tạo công việc mới.'
-              }
-            </p>
-          </div>
-        ) : viewMode === 'group' ? (
-          /* ===== GROUP VIEW ===== */
-          <div className="task-groups">
-            {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
-              <div key={groupName} className="task-group">
-                <div className="task-group-header">
-                  <span className="task-group-icon">
-                    {groupName === 'Chưa phân nhóm' ? '📦' : '🏷️'}
-                  </span>
-                  <h3 className="task-group-name">{groupName}</h3>
-                  <span className="task-group-count">{groupTasks.length}</span>
+          {filteredTasks.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon"><IconArchive style={{ width: 48, height: 48 }} /></div>
+              <h3>Chưa có công việc nào</h3>
+              <p>
+                {isStaff
+                  ? 'Chưa có việc nào được giao cho bạn.'
+                  : 'Bấm "+" để tạo công việc mới.'
+                }
+              </p>
+            </div>
+          ) : viewMode === 'group' ? (
+            /* ===== GROUP VIEW ===== */
+            <div className="task-groups">
+              {Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
+                <div key={groupName} className="task-group">
+                  <div className="task-group-header">
+                    <span className="task-group-icon">
+                      {groupName === 'Chưa phân nhóm' ? <IconArchive /> : <IconTag />}
+                    </span>
+                    <h3 className="task-group-name">{groupName}</h3>
+                    <span className="task-group-count">{groupTasks.length}</span>
+                  </div>
+                  <div className="task-grid">
+                    {groupTasks.map((task, index) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        isDragOver={false}
+                        onClick={() => setSelectedTask(task)}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDragEnd={handleDragEnd}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="task-grid">
-                  {groupTasks.map((task, index) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      isDragOver={false}
-                      onClick={() => setSelectedTask(task)}
-                      onDragStart={handleDragStart}
-                      onDragOver={handleDragOver}
-                      onDragEnd={handleDragEnd}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* ===== LIST VIEW ===== */
-          <div className="task-grid">
-            {filteredTasks.map((task, index) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                index={index}
-                isDragOver={dragOverIndex === index}
-                onClick={() => setSelectedTask(task)}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            /* ===== LIST VIEW ===== */
+            <div className="task-grid">
+              {filteredTasks.map((task, index) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  index={index}
+                  isDragOver={dragOverIndex === index}
+                  onClick={() => setSelectedTask(task)}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* FAB - Floating Action Button */}
       {!isStaff && (
         <button className="fab-button" onClick={() => setShowForm(true)} title="Giao việc mới">
-          <span className="fab-icon">+</span>
+          <span className="fab-icon"><IconPlus /></span>
           <span className="fab-label">Giao việc</span>
         </button>
       )}

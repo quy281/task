@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getInitials, getRoleLabel } from '../services/pb';
+import { IconClipboard, IconUser, IconSend, IconAlertCircle, IconArchive, IconSettings, IconLogout, IconMenu, getDeptIcon } from './Icons';
 
 export default function Layout({ children, filter, onFilterChange, taskCounts, departments = [], onShowAdmin }) {
     const { user, logout, roleLabel, isDirector } = useAuth();
@@ -8,31 +9,30 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
 
     // Build department filters dynamically
     const departmentFilters = useMemo(() => {
-        const icons = ['🔧', '🔨', '🎨', '💼', '📢', '🏢', '📐', '🛠️', '📊', '🎯'];
-        return departments.map((dept, i) => {
+        return departments.map((dept) => {
             const key = 'group_' + dept.toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .replace(/đ/g, 'd').replace(/Đ/g, 'D')
                 .replace(/\s+/g, '_');
-            return { key, label: dept, icon: icons[i % icons.length] };
+            return { key, label: dept, IconComp: getDeptIcon(dept) };
         });
     }, [departments]);
 
     const mainFilters = [
-        { key: 'all', label: 'Tất cả', icon: '📋', count: taskCounts?.all || 0 },
-        { key: 'assigned_to_me', label: 'Việc của tôi', icon: '👤', count: taskCounts?.assignedToMe || 0 },
-        { key: 'assigned_by_me', label: 'Việc đã giao', icon: '📤', count: taskCounts?.assignedByMe || 0 },
-        { key: 'urgent', label: 'Khẩn cấp', icon: '🔴', count: taskCounts?.urgent || 0 },
-        { key: 'archived', label: 'Lưu trữ', icon: '📦', count: taskCounts?.archived || 0 },
+        { key: 'all', label: 'Tất cả', IconComp: IconClipboard, count: taskCounts?.all || 0 },
+        { key: 'assigned_to_me', label: 'Việc của tôi', IconComp: IconUser, count: taskCounts?.assignedToMe || 0 },
+        { key: 'assigned_by_me', label: 'Việc đã giao', IconComp: IconSend, count: taskCounts?.assignedByMe || 0 },
+        { key: 'urgent', label: 'Khẩn cấp', IconComp: IconAlertCircle, count: taskCounts?.urgent || 0 },
+        { key: 'archived', label: 'Lưu trữ', IconComp: IconArchive, count: taskCounts?.archived || 0 },
     ];
 
     // Bottom nav tabs (mobile)
     const bottomTabs = [
-        { key: 'all', label: 'Tất cả', icon: '📋' },
-        { key: 'assigned_to_me', label: 'Của tôi', icon: '👤' },
-        { key: 'urgent', label: 'Khẩn cấp', icon: '🔴' },
-        { key: 'archived', label: 'Lưu trữ', icon: '📦' },
-        { key: '_menu', label: 'Menu', icon: '☰' },
+        { key: 'all', label: 'Tất cả', IconComp: IconClipboard },
+        { key: 'assigned_to_me', label: 'Của tôi', IconComp: IconUser },
+        { key: 'urgent', label: 'Khẩn cấp', IconComp: IconAlertCircle },
+        { key: 'archived', label: 'Lưu trữ', IconComp: IconArchive },
+        { key: '_menu', label: 'Menu', IconComp: IconMenu },
     ];
 
     function handleBottomTab(key) {
@@ -40,7 +40,13 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
             setSidebarOpen(prev => !prev);
         } else {
             onFilterChange(key);
+            setSidebarOpen(false);
         }
+    }
+
+    function handleFilterClick(key) {
+        onFilterChange(key);
+        setSidebarOpen(false);
     }
 
     return (
@@ -64,9 +70,9 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
                             <button
                                 key={f.key}
                                 className={`nav-item ${filter === f.key ? 'active' : ''}`}
-                                onClick={() => { onFilterChange(f.key); setSidebarOpen(false); }}
+                                onClick={() => handleFilterClick(f.key)}
                             >
-                                <span>{f.icon}</span>
+                                <span className="nav-icon"><f.IconComp /></span>
                                 <span>{f.label}</span>
                                 {f.count > 0 && <span className="count">{f.count}</span>}
                             </button>
@@ -79,9 +85,9 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
                             <button
                                 key={f.key}
                                 className={`nav-item ${filter === f.key ? 'active' : ''}`}
-                                onClick={() => { onFilterChange(f.key); setSidebarOpen(false); }}
+                                onClick={() => handleFilterClick(f.key)}
                             >
-                                <span>{f.icon}</span>
+                                <span className="nav-icon"><f.IconComp /></span>
                                 <span>{f.label}</span>
                                 {(taskCounts?.groups?.[f.label] || 0) > 0 && (
                                     <span className="count">{taskCounts.groups[f.label]}</span>
@@ -94,11 +100,11 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
                 <div className="sidebar-footer">
                     {(isDirector || user?.role === 'hr') && onShowAdmin && (
                         <button className="btn-admin" onClick={() => { onShowAdmin(); setSidebarOpen(false); }}>
-                            <span>⚙</span> Quản lý
+                            <IconSettings /> Quản lý
                         </button>
                     )}
                     <button className="btn-logout" onClick={logout}>
-                        <span>🚪</span> Đăng xuất
+                        <IconLogout /> Đăng xuất
                     </button>
                 </div>
             </aside>
@@ -124,7 +130,7 @@ export default function Layout({ children, filter, onFilterChange, taskCounts, d
                         className={`bottom-nav-item ${filter === tab.key ? 'active' : ''} ${tab.key === '_menu' && sidebarOpen ? 'active' : ''}`}
                         onClick={() => handleBottomTab(tab.key)}
                     >
-                        <span className="bottom-nav-icon">{tab.icon}</span>
+                        <span className="bottom-nav-icon"><tab.IconComp /></span>
                         <span className="bottom-nav-label">{tab.label}</span>
                     </button>
                 ))}

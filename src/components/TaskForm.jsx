@@ -43,7 +43,7 @@ export default function TaskForm({ onClose, onSubmit, groups = [] }) {
                 description: '',
                 assigned_by: user.id,
                 assigned_to: [],
-                status: 'todo',
+                status: 'in_progress',
                 priority: 'medium',
                 due_date: null,
                 color: 'default',

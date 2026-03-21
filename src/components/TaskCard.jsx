@@ -36,9 +36,7 @@ export default function TaskCard({ task, index, isDragOver, onClick, onDragStart
                 <div className="task-card-title">{task.title}</div>
                 <div className="task-card-badges">
                     {hasUrgent && <span className="badge badge-urgent-flag">🔴 Khẩn</span>}
-                    <span className={`badge ${STATUS_CLASS[isOverdue ? 'overdue' : task.status]}`}>
-                        {isOverdue ? 'Quá hạn' : STATUS_LABEL[task.status]}
-                    </span>
+                    {isOverdue && <span className="badge badge-overdue">Quá hạn</span>}
                 </div>
             </div>
 

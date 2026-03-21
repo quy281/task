@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { timeAgo } from '../services/pb';
+import { IconBell, IconClipboard, IconZap } from './Icons';
 
 export default function NotificationPanel({ notifications, unreadCount, onMarkAllRead, onMarkRead, onClearAll, onClickNotif }) {
     const [open, setOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function NotificationPanel({ notifications, unreadCount, onMarkAl
     return (
         <div className="notif-wrapper" ref={panelRef}>
             <button className="notif-bell" onClick={() => setOpen(!open)} title="Thông báo">
-                🔔
+                <IconBell />
                 {unreadCount > 0 && (
                     <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
                 )}
@@ -57,7 +58,7 @@ export default function NotificationPanel({ notifications, unreadCount, onMarkAl
                                 }}
                             >
                                 <span className="notif-icon">
-                                    {n.type === 'assigned' ? '📋' : '🔄'}
+                                    {n.type === 'assigned' ? <IconClipboard /> : <IconZap />}
                                 </span>
                                 <div className="notif-content">
                                     <span className="notif-message">{n.message}</span>
