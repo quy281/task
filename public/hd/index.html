@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn sử dụng – MKG Task Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            line-height: 1.7;
+            color: #1e293b;
+            background: #fff;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 28px 60px;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                padding: 0;
+                max-width: 100%;
+                font-size: 11pt;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            h1 {
+                font-size: 22pt;
+            }
+
+            h2 {
+                font-size: 16pt;
+                page-break-after: avoid;
+            }
+
+            h3 {
+                font-size: 13pt;
+            }
+
+            img {
+                max-width: 100% !important;
+            }
+
+            .step {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Header */
+        .guide-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+
+        .guide-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .guide-header .subtitle {
+            font-size: 16px;
+            color: #475569;
+        }
+
+        .guide-header .version {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 12px;
+        }
+
+        /* Print button */
+        .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.2s;
+        }
+
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        /* Sections */
+        h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e40af;
+            margin: 40px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #dbeafe;
+        }
+
+        h2 .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #1e40af;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+            margin: 20px 0 8px;
+        }
+
+        p,
+        li {
+            font-size: 15px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        ul,
+        ol {
+            padding-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* Screenshots */
+        .screenshot {
+            margin: 16px 0 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .screenshot img {
+            width: 100%;
+            display: block;
+        }
+
+        .screenshot .caption {
+            padding: 10px 16px;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Tips */
+        .tip {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fef7e0;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: #1e40af;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content strong {
+            color: #1e293b;
+        }
+
+        /* Keyboard */
+        kbd {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f1f5f9;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            color: #1e40af;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            background: #e2e8f0;
+        }
+
+        /* Footer */
+        .guide-footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 2px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="/" class="back-link no-print">← Quay lại ứng dụng</a>
+
+    <div class="guide-header">
+        <h1>📋 Hướng Dẫn Sử Dụng</h1>
+        <p class="subtitle">MKG Task Manager — Hệ thống quản lý & giao việc</p>
+        <p class="version">Phiên bản 2.0 • Cập nhật: 21/03/2026</p>
+        <button class="btn-print no-print" onclick="window.print()">🖨️ In hướng dẫn</button>
+    </div>
+
+    <!-- ==================== MỤC LỤC ==================== -->
+    <h2><span class="num">📑</span> Mục lục</h2>
+    <ol>
+        <li><a href="#login">Đăng nhập</a></li>
+        <li><a href="#dashboard">Màn hình chính (Dashboard)</a></li>
+        <li><a href="#sidebar">Thanh bên — Bộ lọc & Phòng ban</a></li>
+        <li><a href="#task-detail">Xem chi tiết công việc</a></li>
+        <li><a href="#checklist">Checklist — Báo cáo tiến độ</a></li>
+        <li><a href="#daily-board">Bảng phân công theo ngày</a></li>
+        <li><a href="#report">Xuất báo cáo ngày</a></li>
+        <li><a href="#admin">Quản lý hệ thống</a></li>
+        <li><a href="#roles">Phân quyền theo vai trò</a></li>
+    </ol>
+
+    <!-- ==================== 1. ĐĂNG NHẬP ==================== -->
+    <h2 id="login"><span class="num">1</span> Đăng nhập</h2>
+
+    <p>Truy cập ứng dụng tại <strong>m.mkg.vn</strong> trên điện thoại hoặc máy tính.</p>
+
+    <div class="screenshot">
+        <img src="img/login.png" alt="Màn hình đăng nhập">
+        <div class="caption">Màn hình đăng nhập — nhập tên đăng nhập và mật khẩu</div>
+    </div>
+
+    <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">Nhập <strong>Tên đăng nhập</strong> được cấp (ví dụ: <kbd>thuyle</kbd>,
+            <kbd>admin</kbd>)</div>
+    </div>
+    <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">Nhập <strong>Mật khẩu</strong></div>
+    </div>
+    <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">Bấm <strong>Đăng nhập</strong></div>
+    </div>
+
+    <div class="tip">💡 Nếu chưa có tài khoản, liên hệ quản lý để được cấp.</div>
+
+    <!-- ==================== 2. DASHBOARD ==================== -->
+    <h2 id="dashboard" class="page-break"><span class="num">2</span> Màn hình chính</h2>
+
+    <p>Sau khi đăng nhập, bạn sẽ thấy tất cả công việc được giao dưới dạng các <strong>thẻ công việc</strong>.</p>
+
+    <div class="screenshot">
+        <img src="img/dashboard.png" alt="Dashboard">
+        <div class="caption">Màn hình chính — hiển thị tất cả công việc dạng thẻ</div>
+    </div>
+
+    <h3>Các thành phần trên màn hình:</h3>
+    <table>
+        <tr>
+            <th>Vị trí</th>
+            <th>Chức năng</th>
+        </tr>
+        <tr>
+            <td><strong>Thanh bên trái</strong></td>
+            <td>Bộ lọc: Tất cả, Việc của tôi, Việc đã giao, Phòng ban...</td>
+        </tr>
+        <tr>
+            <td><strong>🔍 Tìm kiếm</strong></td>
+            <td>Gõ tên công việc để tìm nhanh</td>
+        </tr>
+        <tr>
+            <td><strong>3 nút chế độ xem</strong></td>
+            <td>≡ Danh sách &nbsp; ⊞ Nhóm &nbsp; 📅 Bảng phân công</td>
+        </tr>
+        <tr>
+            <td><strong>🔔 Chuông</strong></td>
+            <td>Thông báo mới (việc được giao, cập nhật...)</td>
+        </tr>
+        <tr>
+            <td><strong>+ Giao việc</strong></td>
+            <td>Tạo công việc mới (chỉ quản lý)</td>
+        </tr>
+    </table>
+
+    <div class="warning">⚠️ <strong>Việc khẩn cần duyệt</strong> sẽ hiện ở đầu trang với viền đỏ — bấm vào để xem chi
+        tiết.</div>
+
+    <!-- ==================== 3. SIDEBAR ==================== -->
+    <h2 id="sidebar"><span class="num">3</span> Thanh bên — Bộ lọc</h2>
+
+    <p>Bấm vào các mục ở <strong>thanh bên trái</strong> để lọc công việc:</p>
+
+    <table>
+        <tr>
+            <th>Bộ lọc</th>
+            <th>Hiển thị</th>
+        </tr>
+        <tr>
+            <td><strong>Tất cả</strong></td>
+            <td>Toàn bộ công việc đang hoạt động</td>
+        </tr>
+        <tr>
+            <td><strong>Việc của tôi</strong></td>
+            <td>Chỉ việc được giao cho bạn</td>
+        </tr>
+        <tr>
+            <td><strong>Việc đã giao</strong></td>
+            <td>Việc bạn đã giao cho người khác</td>
+        </tr>
+        <tr>
+            <td><strong>Khẩn cấp</strong></td>
+            <td>Các checklist item được đánh dấu khẩn</td>
+        </tr>
+        <tr>
+            <td><strong>Lưu trữ</strong></td>
+            <td>Việc đã hoàn thành (archived)</td>
+        </tr>
+    </table>
+
+    <h3>Lọc theo phòng ban / đội</h3>
+    <p>Phần <strong>PHÒNG BAN / ĐỘI</strong> ở dưới cho phép lọc nhanh theo nhóm: Đội Hùng, Đội Ngọc, Thiết kế,
+        Marketing...</p>
+    <p>👉 <strong>Bấm 1 lần</strong> vào tên phòng ban để lọc ngay.</p>
+
+    <!-- ==================== 4. CHI TIẾT CÔNG VIỆC ==================== -->
+    <h2 id="task-detail" class="page-break"><span class="num">4</span> Xem chi tiết công việc</h2>
+
+    <p><strong>Bấm vào thẻ công việc</strong> để mở chi tiết.</p>
+
+    <div class="screenshot">
+        <img src="img/task-detail.png" alt="Chi tiết công việc">
+        <div class="caption">Bảng chi tiết — checklist, trao đổi, trạng thái hoàn thành</div>
+    </div>
+
+    <h3>Các nút trên modal:</h3>
+    <table>
+        <tr>
+            <th>Nút</th>
+            <th>Chức năng</th>
+        </tr>
+        <tr>
+            <td>⚙️ Cài đặt</td>
+            <td>Đổi nhóm, người giao, màu sắc</td>
+        </tr>
+        <tr>
+            <td>🎨 Màu</td>
+            <td>Đổi màu thẻ công việc</td>
+        </tr>
+        <tr>
+            <td>🗑️ Xóa</td>
+            <td>Xóa công việc (chỉ quản lý)</td>
+        </tr>
+        <tr>
+            <td>✕ Đóng</td>
+            <td>Đóng chi tiết</td>
+        </tr>
+    </table>
+
+    <!-- ==================== 5. CHECKLIST ==================== -->
+    <h2 id="checklist"><span class="num">5</span> Checklist — Báo cáo tiến độ</h2>
+
+    <p>Mỗi công việc có <strong>danh sách các mục</strong> (checklist). Đây là cách nhân viên báo cáo tiến độ:</p>
+
+    <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">Mở công việc được giao bằng cách bấm vào thẻ</div>
+    </div>
+    <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content"><strong>Tích ☑️ vào mục đã hoàn thành</strong> — thanh tiến độ sẽ tự cập nhật</div>
+    </div>
+    <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">Có thể <strong>thêm mục mới</strong> bằng ô "Thêm mục..." ở cuối danh sách</div>
+    </div>
+    <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">Muốn trao đổi? Gõ vào ô <strong>"Viết trao đổi..."</strong> rồi bấm Gửi</div>
+    </div>
+
+    <div class="tip">💡 <strong>Mục khẩn cấp</strong> (có dấu ⚡) sẽ tự động lên đầu danh sách "Việc khẩn cần duyệt" cho
+        quản lý.</div>
+
+    <h3>Ý nghĩa các biểu tượng:</h3>
+    <table>
+        <tr>
+            <th>Biểu tượng</th>
+            <th>Nghĩa</th>
+        </tr>
+        <tr>
+            <td>☑️ Xanh</td>
+            <td>Mục đã hoàn thành</td>
+        </tr>
+        <tr>
+            <td>⬜ Trống</td>
+            <td>Mục chưa làm</td>
+        </tr>
+        <tr>
+            <td>🔴 Chấm đỏ</td>
+            <td>Mục khẩn cấp</td>
+        </tr>
+        <tr>
+            <td>⚡ Sét</td>
+            <td>Đánh dấu khẩn (bấm để bật/tắt)</td>
+        </tr>
+        <tr>
+            <td>💬 Bong bóng</td>
+            <td>Trao đổi trong mục đó</td>
+        </tr>
+    </table>
+
+    <!-- ==================== 6. BẢNG PHÂN CÔNG NGÀY ==================== -->
+    <h2 id="daily-board" class="page-break"><span class="num">6</span> Bảng phân công theo ngày</h2>
+
+    <p>Bấm vào <strong>icon 📅 (lịch)</strong> trên header để chuyển sang bảng phân công.</p>
+
+    <div class="screenshot">
+        <img src="img/daily-board.png" alt="Bảng phân công ngày">
+        <div class="caption">Bảng phân công — kéo thả công việc giữa các cột ngày</div>
+    </div>
+
+    <h3>Các cột ngày:</h3>
+    <table>
+        <tr>
+            <th>Cột</th>
+            <th>Ý nghĩa</th>
+        </tr>
+        <tr>
+            <td>🟡 Chưa lên lịch</td>
+            <td>Việc chưa có ngày — kéo qua cột ngày để giao</td>
+        </tr>
+        <tr>
+            <td>Hôm qua</td>
+            <td>Việc hôm qua (tham khảo)</td>
+        </tr>
+        <tr>
+            <td>🔵 Hôm nay</td>
+            <td>Việc được giao hôm nay</td>
+        </tr>
+        <tr>
+            <td>Ngày mai</td>
+            <td>Việc cho ngày mai</td>
+        </tr>
+    </table>
+
+    <h3>Cách sử dụng:</h3>
+    <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content"><strong>Kéo thả</strong> công việc từ "Chưa lên lịch" vào cột "Hôm nay" để giao</div>
+    </div>
+    <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">Việc <strong>đã hoàn thành</strong> sẽ có <strong>viền xanh ✅</strong></div>
+    </div>
+    <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content">Việc <strong>chưa xong</strong> sẽ có <strong>viền đỏ 🔴</strong> — dễ nhìn ra ngay
+        </div>
+    </div>
+    <div class="step">
+        <span class="step-num">4</span>
+        <div class="step-content">Bấm nút <strong>"Chuyển X việc → Ngày mai"</strong> để chuyển hết việc chưa xong sang
+            ngày mai</div>
+    </div>
+
+    <!-- ==================== 7. BÁO CÁO ==================== -->
+    <h2 id="report"><span class="num">7</span> Xuất báo cáo ngày</h2>
+
+    <p>Trên bảng phân công, bấm nút <strong>"Xem báo cáo"</strong> để xem tổng hợp:</p>
+
+    <div class="screenshot">
+        <img src="img/report-panel.png" alt="Báo cáo ngày">
+        <div class="caption">Panel báo cáo — phân loại Đã hoàn thành / Chưa hoàn thành</div>
+    </div>
+
+    <h3>Nội dung báo cáo:</h3>
+    <table>
+        <tr>
+            <th>Phần</th>
+            <th>Chi tiết</th>
+        </tr>
+        <tr>
+            <td>✅ Đã hoàn thành</td>
+            <td>Danh sách công việc đã xong hết checklist</td>
+        </tr>
+        <tr>
+            <td>❌ Chưa hoàn thành</td>
+            <td>Công việc chưa xong + <strong>liệt kê từng mục chưa làm</strong></td>
+        </tr>
+    </table>
+
+    <h3>Copy báo cáo:</h3>
+    <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-content">Bấm nút <strong>📎 Copy báo cáo</strong></div>
+    </div>
+    <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-content">Nội dung báo cáo được copy vào clipboard</div>
+    </div>
+    <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-content"><strong>Dán (Ctrl+V)</strong> vào Zalo / Email để gửi giám đốc</div>
+    </div>
+
+    <div class="tip">💡 Trợ lý giám đốc nên xuất báo cáo cuối ngày để giám đốc nắm tình hình.</div>
+
+    <!-- ==================== 8. QUẢN LÝ ==================== -->
+    <h2 id="admin" class="page-break"><span class="num">8</span> Quản lý hệ thống</h2>
+
+    <p>Bấm <strong>"Quản lý"</strong> ở góc dưới thanh bên (chỉ admin/quản lý mới thấy).</p>
+
+    <div class="screenshot">
+        <img src="img/admin.png" alt="Quản lý hệ thống">
+        <div class="caption">Modal quản lý — Phòng ban & Nhân sự</div>
+    </div>
+
+    <h3>Tab Phòng ban / Đội:</h3>
+    <ul>
+        <li>Thêm / xóa phòng ban, đội nhóm</li>
+        <li>Tên phòng ban sẽ hiện ở sidebar để lọc</li>
+    </ul>
+
+    <h3>Tab Nhân sự & Quyền:</h3>
+    <ul>
+        <li>Xem danh sách tất cả nhân viên</li>
+        <li>Thêm nhân viên mới (username + password)</li>
+        <li>Phân quyền vai trò cho từng người</li>
+    </ul>
+
+    <!-- ==================== 9. PHÂN QUYỀN ==================== -->
+    <h2 id="roles"><span class="num">9</span> Phân quyền theo vai trò</h2>
+
+    <table>
+        <tr>
+            <th>Vai trò</th>
+            <th>Quyền hạn</th>
+        </tr>
+        <tr>
+            <td><strong>Giám đốc</strong></td>
+            <td>Xem tất cả, giao việc, quản lý nhân sự & phòng ban, xem báo cáo</td>
+        </tr>
+        <tr>
+            <td><strong>Trợ lý giám đốc</strong></td>
+            <td>Xem tất cả, giao việc, xuất báo cáo ngày, quản lý phòng ban</td>
+        </tr>
+        <tr>
+            <td><strong>Quản lý</strong></td>
+            <td>Xem tất cả, giao việc, quản lý phòng ban</td>
+        </tr>
+        <tr>
+            <td><strong>Nhân viên</strong></td>
+            <td>Chỉ xem việc được giao, tích checklist, trao đổi</td>
+        </tr>
+    </table>
+
+    <div class="warning">⚠️ <strong>Nhân viên</strong> chỉ nhìn thấy việc được giao cho mình — không thấy việc của người
+        khác.</div>
+
+    <!-- ==================== FLOW HÀNG NGÀY ==================== -->
+    <h2 class="page-break"><span class="num">⭐</span> Quy trình hàng ngày</h2>
+
+    <table>
+        <tr>
+            <th>Thời điểm</th>
+            <th>Ai làm</th>
+            <th>Làm gì</th>
+        </tr>
+        <tr>
+            <td><strong>Sáng</strong></td>
+            <td>Quản lý / GĐ</td>
+            <td>Giao việc: Mở bảng phân công 📅 → Kéo task vào "Hôm nay"</td>
+        </tr>
+        <tr>
+            <td><strong>Trong ngày</strong></td>
+            <td>Nhân viên</td>
+            <td>Mở app → Vào "Việc của tôi" → Tích ☑️ các mục đã làm xong</td>
+        </tr>
+        <tr>
+            <td><strong>Cuối ngày</strong></td>
+            <td>Trợ lý GĐ</td>
+            <td>Mở bảng phân công → Bấm "Xem báo cáo" → "Copy báo cáo" → Gửi qua Zalo</td>
+        </tr>
+        <tr>
+            <td><strong>Cuối ngày</strong></td>
+            <td>Trợ lý GĐ</td>
+            <td>Bấm "Chuyển X việc → Ngày mai" để đẩy việc chưa xong sang hôm sau</td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <div class="guide-footer">
+        <p>MKG Task Manager v2.0 — Hệ thống quản lý & giao việc nội bộ</p>
+        <p>Hỗ trợ: Liên hệ Admin hoặc Phòng CNTT</p>
+    </div>
+
+</body>
+
+</html>
