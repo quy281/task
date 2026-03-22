@@ -64,6 +64,41 @@ function Dashboard() {
     }
   }
 
+  // Reorder departments (from DailyBoard drag)
+  async function handleReorderDepts(newDepts) {
+    setDepartments(newDepts);
+    try {
+      await setConfig('departments', newDepts);
+    } catch (err) {
+      console.error('Failed to save dept order:', err);
+    }
+  }
+
+  // Auto-move done tasks → unassigned when overdue (runs once after tasks load)
+  useEffect(() => {
+    if (loading || tasks.length === 0) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    tasks.forEach(task => {
+      if (!task.group) return; // already unassigned
+      const checklist = task.checklist || [];
+      const isAllDone = checklist.length > 0 && checklist.every(c => c.checked);
+      if (!isAllDone) return;
+      // Check due_date
+      if (task.due_date) {
+        const due = new Date(task.due_date);
+        due.setHours(0, 0, 0, 0);
+        if (due < today) {
+          editTask(task.id, { group: '' });
+        }
+      } else {
+        // No due_date and all done → move to unassigned
+        editTask(task.id, { group: '' });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   // Drag state
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
@@ -326,6 +361,7 @@ function Dashboard() {
           allUsers={allUsers}
           onSelectTask={setSelectedTask}
           departments={departments}
+          onReorderDepts={handleReorderDepts}
         />
       ) : (
         <div className="task-grid-container">
