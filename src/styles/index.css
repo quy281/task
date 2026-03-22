@@ -4186,3 +4186,488 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== TEAM ASSIGNMENT BOARD ===== */
+.team-board {
+  padding: 20px 24px;
+  padding-bottom: 100px;
+}
+
+.team-board-header {
+  margin-bottom: 20px;
+}
+
+.team-board-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.team-board-title-row h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.team-board-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.team-board-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.btn-report {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-report:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.btn-report svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Report */
+.team-report {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.team-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.team-report-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-copy-report {
+  padding: 6px 12px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-copy-report:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.team-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.team-report-card {
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.team-report-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.team-report-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.team-report-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.team-report-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.stat-done {
+  color: #22c55e;
+}
+
+.stat-progress {
+  color: #f59e0b;
+}
+
+.stat-todo {
+  color: var(--text-muted);
+}
+
+.team-report-unassigned {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: #92400e;
+}
+
+/* Board columns container */
+.team-board-columns {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.team-board-columns::-webkit-scrollbar {
+  height: 6px;
+}
+
+.team-board-columns::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* Column */
+.team-col {
+  flex: 0 0 280px;
+  min-height: 300px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.team-col.drag-over {
+  border-color: var(--team-color, var(--accent));
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.12), var(--shadow-md);
+  background: var(--team-bg, var(--accent-bg));
+}
+
+.team-col-unassigned {
+  flex: 0 0 260px;
+  background: #f8f9fb;
+  border-style: dashed;
+}
+
+.team-col-unassigned.drag-over {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+}
+
+/* Column header */
+.team-col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 2.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.team-col-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.team-col-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-col-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Column body */
+.team-col-body {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100px;
+}
+
+.team-col-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 30px 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.team-col-empty span:first-child {
+  font-size: 28px;
+}
+
+/* Task card in board */
+.team-task-card {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-light);
+  cursor: grab;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.team-task-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.team-task-card:active {
+  cursor: grabbing;
+}
+
+.team-task-card.dragging {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+.team-task-card.all-done {
+  opacity: 0.7;
+  background: #f7fdf9;
+}
+
+.team-task-card.has-urgent {
+  border-left: 3px solid var(--priority-urgent);
+}
+
+.team-task-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.team-urgent-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--priority-urgent);
+  flex-shrink: 0;
+  margin-top: 5px;
+  animation: urgentPulse 1.5s infinite;
+}
+
+@keyframes urgentPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.team-task-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.team-task-title.line-through {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.team-task-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.team-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.team-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.team-progress-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.team-task-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 6px;
+}
+
+.team-task-due {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.btn-postpone {
+  padding: 3px 8px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.btn-postpone:hover {
+  background: #fef3e2;
+  border-color: #f59e0b;
+  color: #d97706;
+}
+
+.team-task-card.is-draft {
+  border-left: 3px solid #94a3b8;
+  background: #fafbfc;
+}
+
+/* Touch drag ghost */
+.touch-drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.92;
+}
+
+/* ===== RESPONSIVE: TEAM BOARD ===== */
+@media (max-width: 768px) {
+  .team-board {
+    padding: 14px 12px;
+  }
+
+  .team-board-title-row h2 {
+    font-size: 17px;
+  }
+
+  .team-col {
+    flex: 0 0 240px;
+  }
+
+  .team-col-unassigned {
+    flex: 0 0 220px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .team-col {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .team-col-unassigned {
+    flex: 0 0 280px;
+  }
+}

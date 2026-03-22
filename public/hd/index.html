@@ -305,7 +305,7 @@
     <div class="guide-header">
         <h1>📋 Hướng Dẫn Sử Dụng</h1>
         <p class="subtitle">MKG Task Manager — Hệ thống quản lý & giao việc</p>
-        <p class="version">Phiên bản 2.0 • Cập nhật: 21/03/2026</p>
+        <p class="version">Phiên bản 3.0 • Cập nhật: 22/03/2026</p>
         <button class="btn-print no-print" onclick="window.print()">🖨️ In hướng dẫn</button>
     </div>
 
@@ -317,8 +317,8 @@
         <li><a href="#sidebar">Thanh bên — Bộ lọc & Phòng ban</a></li>
         <li><a href="#task-detail">Xem chi tiết công việc</a></li>
         <li><a href="#checklist">Checklist — Báo cáo tiến độ</a></li>
-        <li><a href="#daily-board">Bảng phân công theo ngày</a></li>
-        <li><a href="#report">Xuất báo cáo ngày</a></li>
+        <li><a href="#daily-board">Bảng phân công theo đội</a></li>
+        <li><a href="#report">Xuất báo cáo theo đội</a></li>
         <li><a href="#admin">Quản lý hệ thống</a></li>
         <li><a href="#roles">Phân quyền theo vai trò</a></li>
     </ol>
@@ -336,7 +336,8 @@
     <div class="step">
         <span class="step-num">1</span>
         <div class="step-content">Nhập <strong>Tên đăng nhập</strong> được cấp (ví dụ: <kbd>thuyle</kbd>,
-            <kbd>admin</kbd>)</div>
+            <kbd>admin</kbd>)
+        </div>
     </div>
     <div class="step">
         <span class="step-num">2</span>
@@ -514,101 +515,96 @@
         </tr>
     </table>
 
-    <!-- ==================== 6. BẢNG PHÂN CÔNG NGÀY ==================== -->
-    <h2 id="daily-board" class="page-break"><span class="num">6</span> Bảng phân công theo ngày</h2>
+    <!-- ==================== 6. BẢNG PHÂN CÔNG THEO ĐỘI ==================== -->
+    <h2 id="daily-board" class="page-break"><span class="num">6</span> Bảng phân công theo đội</h2>
 
-    <p>Bấm vào <strong>icon 📅 (lịch)</strong> trên header để chuyển sang bảng phân công.</p>
+    <p>Đây là màn hình <strong>mặc định khi mở app</strong> — Bảng phân công theo đội giúp giám đốc và trợ lý phân chia
+        công việc cho từng đội/phòng ban.</p>
 
-    <div class="screenshot">
-        <img src="img/daily-board.png" alt="Bảng phân công ngày">
-        <div class="caption">Bảng phân công — kéo thả công việc giữa các cột ngày</div>
-    </div>
-
-    <h3>Các cột ngày:</h3>
+    <h3>Cấu trúc bảng:</h3>
     <table>
         <tr>
             <th>Cột</th>
             <th>Ý nghĩa</th>
         </tr>
         <tr>
-            <td>🟡 Chưa lên lịch</td>
-            <td>Việc chưa có ngày — kéo qua cột ngày để giao</td>
+            <td><strong>📝 Nháp của tôi</strong></td>
+            <td>CV chưa sắp xếp — <strong>chỉ bạn thấy</strong> (nháp riêng). Kéo vào đội để phân công.</td>
         </tr>
         <tr>
-            <td>Hôm qua</td>
-            <td>Việc hôm qua (tham khảo)</td>
+            <td><strong>👷 Đội thợ 1, 2...</strong></td>
+            <td>CV đã phân công cho đội — <strong>tất cả mọi người đều thấy</strong></td>
         </tr>
         <tr>
-            <td>🔵 Hôm nay</td>
-            <td>Việc được giao hôm nay</td>
-        </tr>
-        <tr>
-            <td>Ngày mai</td>
-            <td>Việc cho ngày mai</td>
+            <td><strong>🎨 Phòng thiết kế, 💼 KD...</strong></td>
+            <td>Các phòng ban khác — mỗi phòng 1 cột</td>
         </tr>
     </table>
 
-    <h3>Cách sử dụng:</h3>
+    <div class="warning">⚠️ <strong>Quan trọng:</strong> CV ở cột "Nháp" là riêng tư — chỉ người tạo/người được giao
+        thấy. Khi kéo vào đội thì trở thành công khai.</div>
+
+    <h3>Cách phân công:</h3>
     <div class="step">
         <span class="step-num">1</span>
-        <div class="step-content"><strong>Kéo thả</strong> công việc từ "Chưa lên lịch" vào cột "Hôm nay" để giao</div>
+        <div class="step-content">Tạo CV mới bằng nút <strong>"+ Giao việc"</strong> — CV mới sẽ ở cột "Nháp"</div>
     </div>
     <div class="step">
         <span class="step-num">2</span>
-        <div class="step-content">Việc <strong>đã hoàn thành</strong> sẽ có <strong>viền xanh ✅</strong></div>
+        <div class="step-content"><strong>Kéo thả</strong> CV từ "Nháp" sang cột đội/phòng ban để phân công</div>
     </div>
     <div class="step">
         <span class="step-num">3</span>
-        <div class="step-content">Việc <strong>chưa xong</strong> sẽ có <strong>viền đỏ 🔴</strong> — dễ nhìn ra ngay
-        </div>
+        <div class="step-content">Muốn dời CV sang đội khác? <strong>Kéo thả</strong> giữa các cột</div>
     </div>
     <div class="step">
         <span class="step-num">4</span>
-        <div class="step-content">Bấm nút <strong>"Chuyển X việc → Ngày mai"</strong> để chuyển hết việc chưa xong sang
-            ngày mai</div>
+        <div class="step-content">Muốn hoãn? Bấm nút <strong>⏭ Hoãn</strong> trên thẻ CV → chuyển sang ngày mai</div>
     </div>
+
+    <div class="tip">💡 <strong>Trợ lý</strong> có thể bổ sung thêm CV mà Giám đốc không trực tiếp nắm — giúp theo dõi
+        đầy đủ tình hình nhân viên.</div>
 
     <!-- ==================== 7. BÁO CÁO ==================== -->
-    <h2 id="report"><span class="num">7</span> Xuất báo cáo ngày</h2>
+    <h2 id="report"><span class="num">7</span> Xuất báo cáo theo đội</h2>
 
-    <p>Trên bảng phân công, bấm nút <strong>"Xem báo cáo"</strong> để xem tổng hợp:</p>
-
-    <div class="screenshot">
-        <img src="img/report-panel.png" alt="Báo cáo ngày">
-        <div class="caption">Panel báo cáo — phân loại Đã hoàn thành / Chưa hoàn thành</div>
-    </div>
+    <p>Trên bảng phân công, bấm nút <strong>"Xem báo cáo"</strong> để xem tổng hợp từng đội:</p>
 
     <h3>Nội dung báo cáo:</h3>
     <table>
         <tr>
-            <th>Phần</th>
+            <th>Thông tin</th>
             <th>Chi tiết</th>
         </tr>
         <tr>
             <td>✅ Đã hoàn thành</td>
-            <td>Danh sách công việc đã xong hết checklist</td>
+            <td>Số CV đã xong hết checklist trong đội</td>
         </tr>
         <tr>
-            <td>❌ Chưa hoàn thành</td>
-            <td>Công việc chưa xong + <strong>liệt kê từng mục chưa làm</strong></td>
+            <td>🔄 Đang làm</td>
+            <td>Số CV đang có tiến độ</td>
+        </tr>
+        <tr>
+            <td>⬜ Chưa bắt đầu</td>
+            <td>Số CV chưa có checklist item nào hoàn thành</td>
         </tr>
     </table>
 
-    <h3>Copy báo cáo:</h3>
+    <h3>Copy báo cáo gửi Giám đốc:</h3>
     <div class="step">
         <span class="step-num">1</span>
         <div class="step-content">Bấm nút <strong>📎 Copy báo cáo</strong></div>
     </div>
     <div class="step">
         <span class="step-num">2</span>
-        <div class="step-content">Nội dung báo cáo được copy vào clipboard</div>
+        <div class="step-content">Nội dung báo cáo (theo đội) được copy vào clipboard</div>
     </div>
     <div class="step">
         <span class="step-num">3</span>
         <div class="step-content"><strong>Dán (Ctrl+V)</strong> vào Zalo / Email để gửi giám đốc</div>
     </div>
 
-    <div class="tip">💡 Trợ lý giám đốc nên xuất báo cáo cuối ngày để giám đốc nắm tình hình.</div>
+    <div class="tip">💡 Trợ lý nên xuất báo cáo <strong>cuối ngày</strong> để giám đốc nắm tình hình từng đội.</div>
 
     <!-- ==================== 8. QUẢN LÝ ==================== -->
     <h2 id="admin" class="page-break"><span class="num">8</span> Quản lý hệ thống</h2>
@@ -673,8 +669,13 @@
         </tr>
         <tr>
             <td><strong>Sáng</strong></td>
-            <td>Quản lý / GĐ</td>
-            <td>Giao việc: Mở bảng phân công 📅 → Kéo task vào "Hôm nay"</td>
+            <td>GĐ / Trợ lý</td>
+            <td>Mở app → Xem cột "Nháp" → <strong>Kéo thả CV vào các đội</strong> để phân công</td>
+        </tr>
+        <tr>
+            <td><strong>Sáng</strong></td>
+            <td>Trợ lý</td>
+            <td>Bổ sung thêm CV mà GĐ chưa nắm (ấn "+ Giao việc" → CV ở nháp → kéo vào đội)</td>
         </tr>
         <tr>
             <td><strong>Trong ngày</strong></td>
@@ -683,15 +684,18 @@
         </tr>
         <tr>
             <td><strong>Cuối ngày</strong></td>
-            <td>Trợ lý GĐ</td>
-            <td>Mở bảng phân công → Bấm "Xem báo cáo" → "Copy báo cáo" → Gửi qua Zalo</td>
+            <td>Trợ lý</td>
+            <td>Bấm "Xem báo cáo" → "📎 Copy báo cáo" → Dán vào Zalo gửi GĐ</td>
         </tr>
         <tr>
             <td><strong>Cuối ngày</strong></td>
-            <td>Trợ lý GĐ</td>
-            <td>Bấm "Chuyển X việc → Ngày mai" để đẩy việc chưa xong sang hôm sau</td>
+            <td>Trợ lý</td>
+            <td>Bấm <strong>⏭ Hoãn</strong> trên CV chưa xong → chuyển sang ngày mai</td>
         </tr>
     </table>
+
+    <div class="warning">⚠️ <strong>Nhắc nhở cho Trợ lý:</strong> Luôn kiểm tra cột "Nháp" đầu ngày — nếu còn CV chưa
+        phân công thì kéo vào đội ngay. CV nháp không ai ngoài bạn thấy!</div>
 
     <!-- Footer -->
     <div class="guide-footer">

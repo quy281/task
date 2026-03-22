@@ -37,7 +37,7 @@ function Dashboard() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [viewMode, setViewMode] = useState('list'); // 'list' | 'group' | 'daily'
+  const [viewMode, setViewMode] = useState('daily'); // 'list' | 'group' | 'daily'
   const [departments, setDepartments] = useState(INITIAL_GROUPS);
   const [allUsers, setAllUsers] = useState([]);
 
@@ -325,6 +325,7 @@ function Dashboard() {
           onUpdateTask={handleUpdateTask}
           allUsers={allUsers}
           onSelectTask={setSelectedTask}
+          departments={departments}
         />
       ) : (
         <div className="task-grid-container">
